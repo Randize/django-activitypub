@@ -96,7 +96,7 @@ def signed_post(url, private_key, public_key_url, headers=None, body=None):
     headers["host"] = host
     headers["content-type"] = content_type
     headers["signature"] = signature_header
-    headers["user-agent"] = "shimmy's django_activitypub service - unlike mozilla"
+    headers["user-agent"] = "iamthefinalboss.com/1.0 (Windows NT 10.0; Win64; x64)"
 
     response = requests.post(url, data=body, headers=headers)
     return response
