@@ -96,7 +96,7 @@ def signed_post(url, private_key, public_key_url, headers=None, body=None):
     headers["host"] = host
     headers["content-type"] = content_type
     headers["signature"] = signature_header
-    headers["user-agent"] = "iamthefinalboss.com/1.0 (Windows NT 10.0; Win64; x64)"
+    headers["user-agent"] = "Finalboss/1.0 (http.requests/2.32.3; +https://iamthefinalboss.com/)"
 
     response = requests.post(url, data=body, headers=headers)
     return response
