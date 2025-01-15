@@ -69,7 +69,7 @@ def build_signature(host, method, target):
     )
 
 
-def signed_post(url, private_key, public_key_url, headers=None, body=None):
+def signed_post(url, private_key, public_key_url, headers=None, body=''):
     headers = {} if headers is None else headers
 
     parsed_url = urlparse(url)

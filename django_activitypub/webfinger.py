@@ -47,7 +47,7 @@ def finger(username, domain):
 @lru_cache(maxsize=256)
 def fetch_remote_profile(url):
     try:
-        res = requests.post(url, headers={'Accept': 'application/activity+json'})
+        res = requests.get(url, headers={'Accept': 'application/activity+json'})
         res.raise_for_status()
         return res.json()
     except requests.RequestException as e:
