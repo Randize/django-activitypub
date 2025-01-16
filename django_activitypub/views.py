@@ -11,6 +11,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django_activitypub.models import ActorChoices, LocalActor, RemoteActor, Follower, Note
 from django_activitypub.signed_requests import signed_post, SignatureChecker
 from django_activitypub.webfinger import fetch_remote_profile, WebfingerException
+from django.utils.safestring import mark_safe
+
 
 
 def webfinger(request):
@@ -72,7 +74,7 @@ def profile(request, username):
         'discoverable': True,
         'preferredUsername': actor.preferred_username,
         'name': actor.name,
-        'summary': actor.summary,
+        'summary': mark_safe(actor.summary),
         'id': request.build_absolute_uri(reverse('activitypub-profile', kwargs={'username': actor.preferred_username})),
         'followers': request.build_absolute_uri(reverse('activitypub-followers', kwargs={'username': actor.preferred_username})),
         'inbox': request.build_absolute_uri(reverse('activitypub-inbox', kwargs={'username': actor.preferred_username})),
