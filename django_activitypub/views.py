@@ -72,9 +72,12 @@ def profile(request, username):
         ],
         'type': ActorChoices(actor.actor_type).label,
         'discoverable': True,
+        'manuallyApprovesFollowers': False,
         'preferredUsername': actor.preferred_username,
+        'indexable': True, # default False - Makes posts searchable or not
         'name': actor.name,
         'summary': mark_safe(actor.summary),
+        'url': request.build_absolute_uri(reverse('activitypub-profile-short', kwargs={'username': actor.preferred_username})),
         'id': request.build_absolute_uri(reverse('activitypub-profile', kwargs={'username': actor.preferred_username})),
         'followers': request.build_absolute_uri(reverse('activitypub-followers', kwargs={'username': actor.preferred_username})),
         'inbox': request.build_absolute_uri(reverse('activitypub-inbox', kwargs={'username': actor.preferred_username})),
@@ -84,7 +87,9 @@ def profile(request, username):
                 reverse('activitypub-profile', kwargs={'username': actor.preferred_username})) + '#main-key',
             'owner': request.build_absolute_uri(reverse('activitypub-profile', kwargs={'username': actor.preferred_username})),
             'publicKeyPem': actor.public_key,
-        }
+        },
+        'attributionDomains': [request.get_host()],
+        'attachment': [],
     }
     if actor.icon:
         data['icon'] = {
