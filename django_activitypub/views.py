@@ -83,13 +83,16 @@ def profile(request, username):
         'inbox': request.build_absolute_uri(reverse('activitypub-inbox', kwargs={'username': actor.preferred_username})),
         'outbox': request.build_absolute_uri(reverse('activitypub-outbox', kwargs={'username': actor.preferred_username})),
         'publicKey': {
-            'id': request.build_absolute_uri(
-                reverse('activitypub-profile', kwargs={'username': actor.preferred_username})) + '#main-key',
+            'id': request.build_absolute_uri(reverse('activitypub-profile', kwargs={'username': actor.preferred_username})) + '#main-key',
             'owner': request.build_absolute_uri(reverse('activitypub-profile', kwargs={'username': actor.preferred_username})),
             'publicKeyPem': actor.public_key,
         },
         'attributionDomains': [request.get_host()],
-        'attachment': [],
+        'attachment': [{
+            'type':'PropertyValue',
+            'name':'Website',
+            'value':'<a href="https://{}" translate="no"><span class="invisible">https://</span><span class="">{}</span><span class="invisible"></span></a>'.format('https://' + request.get_host(), request.get_host())
+        }],
     }
     if actor.icon:
         data['icon'] = {
