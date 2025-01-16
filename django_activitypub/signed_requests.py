@@ -69,7 +69,7 @@ def build_signature(host, method, target):
     )
 
 
-def signed_post(url, private_key, public_key_url, headers=None, body=''):
+def signed_post(url, private_key, public_key_url, headers=None, body='', method='post'):
     headers = {} if headers is None else headers
 
     parsed_url = urlparse(url)
@@ -83,7 +83,7 @@ def signed_post(url, private_key, public_key_url, headers=None, body=''):
     digest = content_digest_sha256(body)
 
     signature_header = (
-        build_signature(host, "post", target)
+        build_signature(host, method, target)
         .with_field("date", date_header)
         .with_field("digest", digest)
         .with_field("content-type", content_type)
@@ -97,8 +97,10 @@ def signed_post(url, private_key, public_key_url, headers=None, body=''):
     headers["content-type"] = content_type
     headers["signature"] = signature_header
     headers["user-agent"] = "Finalboss/1.0 (http.requests/2.32.3; +https://iamthefinalboss.com/)"
-
-    response = requests.post(url, data=body, headers=headers)
+    if method == 'get':
+        response = requests.get(url, headers=headers)
+    elif method == 'post':
+        response = requests.post(url, data=body, headers=headers)
     return response
 
 
