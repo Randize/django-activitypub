@@ -99,11 +99,11 @@ class LocalActor(models.Model):
 
 
 class RemoteActorManager(models.Manager):
-    def get_or_create_with_url(self, url):
+    def get_or_create_with_url(self, url, actor = None):
         try:
             return self.get(url=url)  # TODO: check cache expiry
         except RemoteActor.DoesNotExist:
-            data = fetch_remote_profile(url)
+            data = fetch_remote_profile(url, actor)
             parsed = urllib.parse.urlparse(url)
             return self.create(
                 username=data.get('preferredUsername'),

@@ -143,13 +143,13 @@ def inbox(request, username):
     if request.method == 'POST':
         activity = json.loads(request.body)
 
-        if validate_resp := validate_post_request(request, activity, username):
-            return validate_resp
-
         try:
             actor = LocalActor.objects.get(preferred_username=username)
         except LocalActor.DoesNotExist:
             return JsonResponse({}, status=404)
+
+        if validate_resp := validate_post_request(request, activity, actor):
+            return validate_resp
 
         if activity['type'] == 'Follow':
             # validate the 'object' is the actor
@@ -158,7 +158,7 @@ def inbox(request, username):
                 return JsonResponse({'error': f'follow object does not match actor: {activity["object"]}'}, status=400)
 
             # find or create a remote actor
-            remote_actor = RemoteActor.objects.get_or_create_with_url(url=activity['actor'])
+            remote_actor = RemoteActor.objects.get_or_create_with_url(url=activity['actor'], actor)
 
             Follower.objects.get_or_create(
                 remote_actor=remote_actor,
@@ -192,7 +192,7 @@ def inbox(request, username):
             if not note:
                 return JsonResponse({'error': f'like object is not a note: {activity["object"]}'}, status=400)
 
-            remote_actor = RemoteActor.objects.get_or_create_with_url(url=activity['actor'])
+            remote_actor = RemoteActor.objects.get_or_create_with_url(url=activity['actor'], actor)
             note.likes.add(remote_actor)
 
             response['ok'] = True
@@ -202,7 +202,7 @@ def inbox(request, username):
             if not note:
                 return JsonResponse({'error': f'announce object is not a note: {activity["object"]}'}, status=400)
 
-            remote_actor = RemoteActor.objects.get_or_create_with_url(url=activity['actor'])
+            remote_actor = RemoteActor.objects.get_or_create_with_url(url=activity['actor'], actor)
             note.announces.add(remote_actor)
 
             response['ok'] = True
@@ -301,7 +301,7 @@ def outbox(request, username):
         return JsonResponse({'error': f'invalid page number: {page_num}'}, status=404)
 
 
-def validate_post_request(request, activity, username = None):
+def validate_post_request(request, activity, actor = None):
     if request.method != 'POST':
         raise Exception('Invalid method')
 
@@ -309,7 +309,7 @@ def validate_post_request(request, activity, username = None):
         return JsonResponse({'error': f'no actor in activity: {activity}'}, status=400)
 
     try:
-        actor_data = fetch_remote_profile(activity['actor'], LocalActor.objects.get(preferred_username=username))
+        actor_data = fetch_remote_profile(activity['actor'], actor)
     except WebfingerException:
         return JsonResponse({'error': 'validate - error fetching remote profile'}, status=400)
 
