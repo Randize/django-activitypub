@@ -103,7 +103,10 @@ class RemoteActorManager(models.Manager):
         try:
             return self.get(url=url)  # TODO: check cache expiry
         except RemoteActor.DoesNotExist:
-            data = fetch_remote_profile(url, actor)
+            if actor:
+                data = fetch_remote_profile(url, actor)
+            else:
+                data = fetch_remote_profile(url, actor)
             parsed = urllib.parse.urlparse(url)
             return self.create(
                 username=data.get('preferredUsername'),
