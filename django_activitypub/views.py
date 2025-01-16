@@ -143,7 +143,7 @@ def inbox(request, username):
     if request.method == 'POST':
         activity = json.loads(request.body)
 
-        if validate_resp := validate_post_request(request, activity):
+        if validate_resp := validate_post_request(request, activity, username):
             return validate_resp
 
         try:
@@ -301,7 +301,7 @@ def outbox(request, username):
         return JsonResponse({'error': f'invalid page number: {page_num}'}, status=404)
 
 
-def validate_post_request(request, activity):
+def validate_post_request(request, activity, username = None):
     if request.method != 'POST':
         raise Exception('Invalid method')
 
@@ -309,7 +309,7 @@ def validate_post_request(request, activity):
         return JsonResponse({'error': f'no actor in activity: {activity}'}, status=400)
 
     try:
-        actor_data = fetch_remote_profile(activity['actor'], LocalActor.objects.get(user=request.user))
+        actor_data = fetch_remote_profile(activity['actor'], LocalActor.objects.get(preferred_username=username))
     except WebfingerException:
         return JsonResponse({'error': 'validate - error fetching remote profile'}, status=400)
 
