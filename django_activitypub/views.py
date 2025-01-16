@@ -309,7 +309,7 @@ def validate_post_request(request, activity):
         return JsonResponse({'error': f'no actor in activity: {activity}'}, status=400)
 
     try:
-        actor_data = fetch_remote_profile(activity['actor'])
+        actor_data = fetch_remote_profile(activity['actor'], LocalActor.objects.get(user=request.user))
     except WebfingerException:
         return JsonResponse({'error': 'validate - error fetching remote profile'}, status=400)
 

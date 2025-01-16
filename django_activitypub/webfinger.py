@@ -1,3 +1,4 @@
+from django_activitypub.signed_requests import signed_post
 from functools import lru_cache
 
 import requests
@@ -45,9 +46,13 @@ def finger(username, domain):
 
 
 @lru_cache(maxsize=256)
-def fetch_remote_profile(url):
+def fetch_remote_profile(url, actor=None):
     try:
         res = requests.get(url, headers={'Accept': 'application/activity+json'})
+        # signed_post if profile is needs signing
+        if res.json()['error'] == 'Request not signed' and actor:
+            res = signed_post(url, actor.private_key.encode('utf-8'), 'https://iamthefinalboss.com/pub/rensensei#main-key', method='get')
+
         res.raise_for_status()
         return res.json()
     except requests.RequestException as e:
