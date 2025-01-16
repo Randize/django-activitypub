@@ -158,7 +158,7 @@ def inbox(request, username):
                 return JsonResponse({'error': f'follow object does not match actor: {activity["object"]}'}, status=400)
 
             # find or create a remote actor
-            remote_actor = RemoteActor.objects.get_or_create_with_url(url=activity['actor'], actor)
+            remote_actor = RemoteActor.objects.get_or_create_with_url(url=activity['actor'], actor=actor)
 
             Follower.objects.get_or_create(
                 remote_actor=remote_actor,
@@ -192,7 +192,7 @@ def inbox(request, username):
             if not note:
                 return JsonResponse({'error': f'like object is not a note: {activity["object"]}'}, status=400)
 
-            remote_actor = RemoteActor.objects.get_or_create_with_url(url=activity['actor'], actor)
+            remote_actor = RemoteActor.objects.get_or_create_with_url(url=activity['actor'], actor=actor)
             note.likes.add(remote_actor)
 
             response['ok'] = True
@@ -202,7 +202,7 @@ def inbox(request, username):
             if not note:
                 return JsonResponse({'error': f'announce object is not a note: {activity["object"]}'}, status=400)
 
-            remote_actor = RemoteActor.objects.get_or_create_with_url(url=activity['actor'], actor)
+            remote_actor = RemoteActor.objects.get_or_create_with_url(url=activity['actor'], actor=actor)
             note.announces.add(remote_actor)
 
             response['ok'] = True
