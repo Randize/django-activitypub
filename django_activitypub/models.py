@@ -277,7 +277,7 @@ class Note(TreeNode):
 
 # TODO: 
 def parse_hashtags(content):
-    pass
+    return []
 
 def parse_mentions(content):
     """
