@@ -316,8 +316,8 @@ def send_create_note_to_followers(base_url, note):
                 body=json.dumps(create_msg)
             )
             resp.raise_for_status()
-        except:
-            pass
+        except Exception as e:  # TODO: handle 404 and delete followers 
+            print(str(e))
 
 def send_update_note_to_followers(base_url, note):
     actor_url = f'{base_url}{note.local_actor.get_absolute_url()}'
@@ -341,8 +341,8 @@ def send_update_note_to_followers(base_url, note):
                 body=json.dumps(update_msg)
             )
             resp.raise_for_status()
-        except: # TODO: handle 404 and delete followers 
-            pass
+        except Exception as e:  # TODO: handle 404 and delete followers 
+            print(str(e))
 
 
 def send_delete_note_to_followers(base_url, note):
@@ -368,8 +368,8 @@ def send_delete_note_to_followers(base_url, note):
                 body=json.dumps(delete_msg)
             )
             resp.raise_for_status()
-        except:
-            pass
+        except Exception as e:
+            print(str(e))
 
 
 def get_object(url):
