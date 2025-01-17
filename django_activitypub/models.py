@@ -257,11 +257,24 @@ class Note(TreeNode):
             # TODO: figure out how to show link card in post
             'type': 'Note',
             'id': self.content_url,
+            'url': self.content_url,
+            'summary': None,
+            'inReplyTo': None,
             'published': format_datetime(self.published_at),
+            'updated': format_datetime(self.updated_at),
             'attributedTo': attributed,
-            'content': self.content,
             'tags': list(parse_mentions(self.content)) + list(parse_hashtags(self.content)),
-            'to': 'https://www.w3.org/ns/activitystreams#Public'
+            'to': 'https://www.w3.org/ns/activitystreams#Public',
+            'cc': f'{base_uri}{self.local_actor.get_absolute_url()}' + '/followers',
+            'sensitive': False,
+            'atomUri': self.content_url,
+            'inReplyToAtomUri': None,
+            'conversation': None,
+            'content': self.content,
+            'contentMap': {},
+            'tag': [],
+            'attachment': [],
+            'replies': {},
         }
         if self.parent:
             data['inReplyTo'] = self.parent.content_url
