@@ -308,14 +308,16 @@ def send_create_note_to_followers(base_url, note):
     }
 
     for follower in note.local_actor.followers.all():
-        resp = signed_post(
-            follower.profile.get('inbox'),
-            note.local_actor.private_key.encode('utf-8'),
-            f'{actor_url}#main-key',
-            body=json.dumps(create_msg)
-        )
-        resp.raise_for_status()
-
+        try:
+            resp = signed_post(
+                follower.profile.get('inbox'),
+                note.local_actor.private_key.encode('utf-8'),
+                f'{actor_url}#main-key',
+                body=json.dumps(create_msg)
+            )
+            resp.raise_for_status()
+        except:
+            pass
 
 def send_update_note_to_followers(base_url, note):
     actor_url = f'{base_url}{note.local_actor.get_absolute_url()}'
@@ -331,13 +333,16 @@ def send_update_note_to_followers(base_url, note):
     }
 
     for follower in note.local_actor.followers.all():
-        resp = signed_post(
-            follower.profile.get('inbox'),
-            note.local_actor.private_key.encode('utf-8'),
-            f'{actor_url}#main-key',
-            body=json.dumps(update_msg)
-        )
-        resp.raise_for_status()
+        try:
+            resp = signed_post(
+                follower.profile.get('inbox'),
+                note.local_actor.private_key.encode('utf-8'),
+                f'{actor_url}#main-key',
+                body=json.dumps(update_msg)
+            )
+            resp.raise_for_status()
+        except: # TODO: handle 404 and delete followers 
+            pass
 
 
 def send_delete_note_to_followers(base_url, note):
@@ -355,13 +360,16 @@ def send_delete_note_to_followers(base_url, note):
     }
 
     for follower in note.local_actor.followers.all():
-        resp = signed_post(
-            follower.profile.get('inbox'),
-            note.local_actor.private_key.encode('utf-8'),
-            f'{actor_url}#main-key',
-            body=json.dumps(delete_msg)
-        )
-        resp.raise_for_status()
+        try:
+            resp = signed_post(
+                follower.profile.get('inbox'),
+                note.local_actor.private_key.encode('utf-8'),
+                f'{actor_url}#main-key',
+                body=json.dumps(delete_msg)
+            )
+            resp.raise_for_status()
+        except:
+            pass
 
 
 def get_object(url):
