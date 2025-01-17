@@ -254,27 +254,34 @@ class Note(TreeNode):
         else:
             attributed = self.remote_actor.url
         data = {
-            # TODO: figure out how to show link card in post
-            'type': 'Note',
-            'id': self.content_url,
-            'url': self.content_url,
-            'summary': None,
-            'inReplyTo': None,
+            'id': f'{self.content_url}/activity', #TODO: outbox activity in views
+            'type': 'Create',
+            'actor': self.local_actor.account_url,
             'published': format_datetime(self.published_at),
-            'updated': format_datetime(self.updated_at),
-            'attributedTo': attributed,
-            'tags': list(parse_mentions(self.content)) + list(parse_hashtags(self.content)),
             'to': 'https://www.w3.org/ns/activitystreams#Public',
-            'cc': f'{base_uri}{self.local_actor.get_absolute_url()}' + '/followers',
-            'sensitive': False,
-            'atomUri': self.content_url,
-            'inReplyToAtomUri': None,
-            'conversation': None,
-            'content': self.content,
-            'contentMap': {},
-            'tag': [],
-            'attachment': [],
-            'replies': {},
+            'cc': f'https://{self.local_actor.domain}' + reverse('activitypub-followers', kwargs={'username': self.local_actor.preferred_username}),
+            'object': {
+                'id': self.content_url,
+                'type': 'Note',
+                'url': self.content_url,
+                'summary': None,
+                'inReplyTo': None,
+                'published': format_datetime(self.published_at),
+                'updated': format_datetime(self.updated_at),
+                'attributedTo': attributed,
+                'tags': list(parse_mentions(self.content)) + list(parse_hashtags(self.content)),
+                'to': 'https://www.w3.org/ns/activitystreams#Public',
+                'cc': f'https://{self.local_actor.domain}' + reverse('activitypub-followers', kwargs={'username': self.local_actor.preferred_username}),
+                'sensitive': False,
+                'atomUri': self.content_url,
+                'inReplyToAtomUri': None,
+                'conversation': None,
+                'content': self.content,
+                'contentMap': {},
+                'tag': [],
+                'attachment': [],
+                'replies': {}
+            }
         }
         if self.parent:
             data['inReplyTo'] = self.parent.content_url
