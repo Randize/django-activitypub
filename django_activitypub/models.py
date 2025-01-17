@@ -254,12 +254,13 @@ class Note(TreeNode):
         else:
             attributed = self.remote_actor.url
         data = {
+            # TODO: figure out how to show link card in post
             'type': 'Note',
             'id': self.content_url,
             'published': format_datetime(self.published_at),
             'attributedTo': attributed,
             'content': self.content,
-            'tags': list(parse_mentions(self.content)),
+            'tags': list(parse_mentions(self.content)) + list(parse_hashtags(self.content)),
             'to': 'https://www.w3.org/ns/activitystreams#Public'
         }
         if self.parent:
@@ -274,6 +275,9 @@ class Note(TreeNode):
     def max_depth(self):
         return min(getattr(self, 'tree_depth', 1), 5)
 
+# TODO: 
+def parse_hashtags(content):
+    pass
 
 def parse_mentions(content):
     """
