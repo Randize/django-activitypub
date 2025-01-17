@@ -91,7 +91,7 @@ def profile(request, username):
         'attachment': [{
             'type':'PropertyValue',
             'name':'Website',
-            'value':'<a href="https://{}" translate="no"><span class="invisible">https://</span><span class="">{}</span><span class="invisible"></span></a>'.format('https://' + request.get_host(), request.get_host())
+            'value':'<a href="https://{}" translate="no"><span class="">{}</span><span class="invisible"></span></a>'.format('https://' + request.get_host(), request.get_host())
         }],
     }
     if actor.icon:
