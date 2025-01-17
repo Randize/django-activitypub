@@ -269,7 +269,6 @@ class Note(TreeNode):
                 'published': format_datetime(self.published_at),
                 'updated': format_datetime(self.updated_at),
                 'attributedTo': attributed,
-                'tag': list(parse_mentions(self.content)) + list(parse_hashtags(self.content)),
                 'to': 'https://www.w3.org/ns/activitystreams#Public',
                 'cc': f'https://{self.local_actor.domain}' + reverse('activitypub-followers', kwargs={'username': self.local_actor.preferred_username}),
                 'sensitive': False,
@@ -278,7 +277,7 @@ class Note(TreeNode):
                 'conversation': None,
                 'content': self.content,
                 'contentMap': {},
-                'tag': [],
+                'tag': list(parse_mentions(self.content)) + list(parse_hashtags(self.content)),
                 'attachment': [],
                 'replies': {} # TODO: Need to add inbox support for replies
             }
