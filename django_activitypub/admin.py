@@ -9,4 +9,4 @@ admin.site.register(Follower)
 
 @admin.register(Note)
 class NoteAdmin(admin.ModelAdmin):
-    list_display = ('id', 'content', 'updated_at')
+    list_display = ('id', 'content_url', 'updated_at')
