@@ -1,6 +1,6 @@
 import json
 import urllib.parse
-import uuid
+import uuid, re
 
 import requests
 from django.urls import resolve, reverse
@@ -277,7 +277,7 @@ class Note(TreeNode):
                 'conversation': None,
                 'content': self.content,
                 'contentMap': {},
-                'tag': list(parse_mentions(self.content)) + list(parse_hashtags(self.content)),
+                'tag': list(parse_mentions(self.content)) + list(parse_hashtags(self.content, base_uri)),
                 'attachment': [],
                 'replies': {}, # TODO: Need to add inbox support for replies
                 'likes': {},
@@ -296,10 +296,14 @@ class Note(TreeNode):
     def max_depth(self):
         return min(getattr(self, 'tree_depth', 1), 5)
 
-# TODO: 
-def parse_hashtags(content):
-    return []
-
+def parse_hashtags(content, base_url):
+    for t in re.findall(r'#\w+', content):
+        yield {
+            'type': 'Hashtag',
+            'href': f'https://{base_url}/tags/{t}',
+            'name': t,
+        }
+    
 def parse_mentions(content):
     """
     Parse a note's content for mentions and return a generator of mention objects
@@ -327,7 +331,7 @@ def send_create_note_to_followers(base_url, note):
             'https://w3id.org/security/v1'
         ],
         'type': 'Create',
-        'id': f'{base_url}/{uuid.uuid4()}',
+        'id': f'{base_url}/{uuid.uuid4()}', #TODO: record uuid here for views and updates
         'actor': actor_url,
         'object': note.as_json(base_url)
     }
