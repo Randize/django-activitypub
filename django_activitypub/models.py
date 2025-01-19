@@ -279,7 +279,9 @@ class Note(TreeNode):
                 'contentMap': {},
                 'tag': list(parse_mentions(self.content)) + list(parse_hashtags(self.content)),
                 'attachment': [],
-                'replies': {} # TODO: Need to add inbox support for replies
+                'replies': {}, # TODO: Need to add inbox support for replies
+                'likes': {},
+                'shares': {}
             }
         }
         if self.parent:
