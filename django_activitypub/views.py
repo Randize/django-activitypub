@@ -3,7 +3,10 @@ import re
 import uuid
 import urllib.parse
 
-from django.http import JsonResponse
+from xml.etree.ElementTree import Element, SubElement, tostring
+from xml.dom.minidom import parseString
+
+from django.http import JsonResponse, HttpResponse
 from django.shortcuts import get_object_or_404
 from django.urls import reverse, resolve
 from django.core.paginator import Paginator
@@ -57,6 +60,25 @@ def webfinger(request):
         })
 
     return JsonResponse(data, content_type="application/jrd+json")
+
+
+def hostmeta(request):
+    data = {
+        "Link": {
+            "rel": "lrdd",
+            "template": request.build_absolute_uri(reverse('activitypub-webfinger')) + "?resource={uri}"
+        }
+    }
+
+    xrd = Element("XRD", xmlns="http://docs.oasis-open.org/ns/xri/xrd-1.0")
+    for tag, attributes in data.items():
+        element = SubElement(xrd, tag)
+        for attr, value in attributes.items():
+            element.set(attr, value)
+            
+    raw_xml = tostring(xrd, encoding="utf-8")
+    xml_content  = parseString(raw_xml).toprettyxml(indent="  ", encoding="utf-8")
+    return HttpResponse(xml_content, content_type="application/xml")
 
 
 def profile(request, username):
