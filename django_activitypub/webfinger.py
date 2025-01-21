@@ -51,7 +51,7 @@ def fetch_remote_profile(url, actor=None):
         res = requests.get(url, headers={'Accept': 'application/activity+json'})
         # signed_post if profile is needs signing
         if 'error' in res.json() and res.json()['error'] == 'Request not signed' and actor:
-            res = signed_post(url, actor.private_key.encode('utf-8'), 'https://iamthefinalboss.com/pub/rensensei#main-key', method='get')
+            res = signed_post(url, actor.private_key.encode('utf-8'), f'{actor.account_url}#main-key', method='get')
 
         res.raise_for_status()
         return res.json()
