@@ -80,6 +80,84 @@ def hostmeta(request):
     return HttpResponse(xml_content, content_type="application/xml")
 
 
+def nodeinfo_links(request):
+    base_url = request.build_absolute_uri('/')
+    data = {
+        "links": [
+            {
+                "rel": "http://nodeinfo.diaspora.software/ns/schema/2.0",
+                "href": f"{base_url}nodeinfo/2.0"
+            }
+        ]
+    }
+    return JsonResponse(data)
+
+
+#TODO: Get settings from models
+def nodeinfo(request, version):
+    if version == '2.0':
+        data = {
+                "version": "2.0",
+                "software": {
+                    "name": "finalboss",
+                    "version": "1.0",
+                    "homepage": "https://iamthefinalboss.com"
+                },
+                "protocols": ["activitypub"],
+                "services": {
+                    "inbound": [],
+                    "outbound": []
+                },
+                "openRegistrations": False,
+                "usage": {
+                    "users": {
+                    "total": 0,
+                    "activeHalfyear": 0,
+                    "activeMonth": 0
+                    },
+                    "localPosts": 0, #TO: get total posts and replies from Notes
+                    "localComments": 0
+                },
+                "metadata": {
+                    "nodeName": "I am the Final Boss",
+                    "nodeDescription": "Just another #webcomic site #webtoon #漫画"
+                },
+                "nodeAdmins": [
+                    {
+                        "name": "rensensei",
+                        "email": "rensensei@outlook.com"
+                    }
+                ],
+                "maintainer": [
+                    {
+                        "name": "rensensei",
+                        "email": "rensensei@outlook.com"
+                    }
+                ],
+                "langs": [],
+                "tosUrl": "https://iamthefinalboss.com/terms/",
+                "privacyPolicyUrl": None,
+                "inquiryUrl": None,
+                "impressumUrl": None,
+                "repositoryUrl": None,
+                "feedbackUrl": None,
+                "disableRegistration": True,
+                "disableLocalTimeline": False,
+                "disableGlobalTimeline": True,
+                "emailRequiredForSignup": True,
+                "enableHcaptcha": False,
+                "enableRecaptcha": False,
+                "enableMcaptcha": False,
+                "enableTurnstile": False,
+                "maxNoteTextLength": 3000,
+                "enableEmail": False,
+                "enableServiceWorker": False,
+                "proxyAccountName": "proxy",
+                "themeColor": "#000000"
+        }
+        return JsonResponse(data)
+
+
 def profile(request, username):
     try:
         actor = LocalActor.objects.get(preferred_username=username)
