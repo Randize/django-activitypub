@@ -295,7 +295,7 @@ class Note(TreeNode):
         elif mode == 'statuses':
             data = object
             if self.children:
-                replies_url = f'https://{self.local_actor.domain}' + reverse('activitypub-notes-replies', kwargs={'username': self.local_actor.preferred_username, 'id': self.content_id})'
+                replies_url = f'https://{self.local_actor.domain}' + reverse('activitypub-notes-replies', kwargs={'username': self.local_actor.preferred_username, 'id': self.content_id})
                 data['replies'] = {
                     'id': replies_url,
                     'type': 'Collection',
