@@ -254,10 +254,9 @@ def notes(request, username, id, mode = 'statuses'):
                 data['type'] = 'CollectionPage'
                 data['partOf'] = replies_url
                 data['items'] = [note.get_absolute_url() for note in page.object_list]
-                return JsonResponse(data, content_type="application/activity+json")
             else:
                 return JsonResponse({'error': f'invalid page number {page_num}'}, status=404)
-
+    return JsonResponse(data, content_type="application/activity+json")
 
 def followers(request, username):
     try:
