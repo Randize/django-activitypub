@@ -156,6 +156,8 @@ def nodeinfo(request, version):
                 "themeColor": "#000000"
         }
         return JsonResponse(data)
+    else:
+        return JsonResponse({'error': 'Unsupported version'}, status=404)
 
 
 def profile(request, username):
