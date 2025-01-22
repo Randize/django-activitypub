@@ -17,7 +17,6 @@ from django_activitypub.webfinger import fetch_remote_profile, WebfingerExceptio
 from django.utils.safestring import mark_safe
 
 
-
 def webfinger(request):
     resource = request.GET.get('resource')
     acct_m = re.match(r'^acct:(?P<username>.+?)@(?P<domain>.+)$', resource)
@@ -121,12 +120,16 @@ def profile(request, username):
             'type': 'Image',
             'mediaType': 'image/jpeg',  # todo make this dynamic
             'url': request.build_absolute_uri(actor.icon.url),
+            'sensitive': False,
+            'name': None,
         }
     if actor.image:
         data['image'] = {
             'type': 'Image',
             'mediaType': 'image/jpeg',  # todo make this dynamic
             'url': request.build_absolute_uri(actor.image.url),
+            'sensitive': False,
+            'name': None,
         }
 
     return JsonResponse(data, content_type="application/activity+json")
