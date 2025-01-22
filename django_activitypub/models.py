@@ -232,8 +232,10 @@ class Note(TreeNode):
     updated_at = models.DateTimeField(auto_now=True)
     content = models.TextField()
     content_url = models.URLField(db_index=True)
+    content_id = models.CharField(max_length=18, unique=True, default=str(uuid.uuid4().int)[:18], editable=False)
     likes = models.ManyToManyField(RemoteActor, blank=True, related_name='likes')
     announces = models.ManyToManyField(RemoteActor, blank=True, related_name='announces')
+    sensitive = models.BooleanField(default=False)
 
     objects = NoteManager.as_manager()
 
@@ -243,49 +245,68 @@ class Note(TreeNode):
         ]
 
     def __str__(self):
-        return self.content_url
+        return self.get_absolute_url()
 
     def get_absolute_url(self):
+        if self.local_actor:
+            return f'{self.content_url}/statuses/{self.content_id}'
         return self.content_url
 
-    def as_json(self, base_uri):
+    def as_json(self, base_uri, mode = 'activity'):
         if self.local_actor:
-            attributed = f'{base_uri}{self.local_actor.get_absolute_url()}'
+            attributed = self.local_actor.get_absolute_url()
         else:
             attributed = self.remote_actor.url
-        data = {
-            'id': f'{self.content_url}/activity', #TODO: outbox activity in views
-            'type': 'Create',
-            'actor': self.local_actor.account_url,
+        object = {
+            'id': self.get_absolute_url(), # TODO: handle remote & local content_url
+            'type': 'Note',
+            'url': self.content_url,
+            'summary': None,
+            'inReplyTo': None,
             'published': format_datetime(self.published_at),
+            'updated': format_datetime(self.updated_at),
+            'attributedTo': attributed,
             'to': 'https://www.w3.org/ns/activitystreams#Public',
             'cc': f'https://{self.local_actor.domain}' + reverse('activitypub-followers', kwargs={'username': self.local_actor.preferred_username}),
-            'object': {
-                'id': self.content_url,
-                'type': 'Note',
-                'url': self.content_url,
-                'summary': None,
-                'inReplyTo': None,
-                'published': format_datetime(self.published_at),
-                'updated': format_datetime(self.updated_at),
-                'attributedTo': attributed,
-                'to': 'https://www.w3.org/ns/activitystreams#Public',
-                'cc': f'https://{self.local_actor.domain}' + reverse('activitypub-followers', kwargs={'username': self.local_actor.preferred_username}),
-                'sensitive': False,
-                'atomUri': self.content_url,
-                'inReplyToAtomUri': None,
-                'conversation': None,
-                'content': self.content,
-                'contentMap': {},
-                'tag': list(parse_mentions(self.content)) + list(parse_hashtags(self.content, base_uri)),
-                'attachment': [],
-                'replies': {}, # TODO: Need to add inbox support for replies
-                'likes': {},
-                'shares': {}
-            }
+            'sensitive': self.sensitive,
+            'atomUri': self.content_url,
+            'inReplyToAtomUri': None,
+            'conversation': None,
+            'content': self.content,
+            'contentMap': {},
+            'tag': list(parse_mentions(self.content)) + list(parse_hashtags(self.content, base_uri)),
+            'attachment': [],
+            'replies': {}, # TODO: Need to add inbox support for replies
+            'likes': {},
+            'shares': {},
         }
         if self.parent:
-            data['inReplyTo'] = self.parent.content_url
+            object['inReplyTo'] = self.parent.content_url
+        if mode == 'activity':
+            data = {
+                'id': f'{self.content_url}/statuses/{self.content_id}',
+                'type': 'Create',
+                'actor': self.local_actor.account_url,
+                'published': format_datetime(self.published_at),
+                'to': 'https://www.w3.org/ns/activitystreams#Public',
+                'cc': f'https://{self.local_actor.domain}' + reverse('activitypub-followers', kwargs={'username': self.local_actor.preferred_username}),
+                'object': object
+            }
+        elif mode == 'statuses':
+            data = object
+            if self.children:
+                replies_url = f'{self.content_url}/statuses/{self.content_id}/replies'
+                data['replies'] = {
+                    'id': replies_url,
+                    'type': 'Collection',
+                    'first': {
+                        'id': replies_url + '?page=1',
+                        'type': 'CollectionPage',
+                        'next': replies_url + '?page=1',
+                        'partOf': replies_url,
+                        'items': []
+                    }
+                }
         return data
 
     @property

@@ -215,6 +215,50 @@ def profile(request, username):
     return JsonResponse(data, content_type="application/activity+json")
 
 
+def notes(request, id, mode = 'statuses'):
+    try:
+        note = Note.objects.get(content_id=id)
+    except:
+        return JsonResponse({'error': 'Not Found'}, status=404)
+    if mode == 'statuses':
+        data = note.as_json(request.build_absolute_uri, mode='statuses')
+    elif mode == 'activity':
+        data = note.as_json(request.build_absolute_uri, mode='activity')
+    elif mode == 'replies':
+        query = Note.objects.get_children_queryset().order_by('-published_at')
+        paginator = Paginator(query, 10)
+        page_num_arg = request.GET.get('page', None)
+        replies_url = request.build_absolute_uri(reverse('activitypub-notes-replies', kwargs={'id': id}))
+        data = {
+            '@context': 'https://www.w3.org/ns/activitystreams',
+            'id': replies_url,
+            'type': 'Collection',
+        }
+
+        if page_num_arg is None:
+            data['first'] = {
+                'id': replies_url + '?page=1',
+                'type': 'CollectionPage',
+                'next': replies_url + '?page=1',
+                'partOf': replies_url,
+                'items': []
+            }
+        else:
+            page_num = int(page_num_arg)
+
+            if 1 <= page_num <= paginator.num_pages:
+                page = paginator.page(page_num)
+                if page.has_next():
+                    data['next'] = replies_url + f'?page={page.next_page_number()}'
+                data['id'] = replies_url + f'?page={page_num}'
+                data['type'] = 'CollectionPage'
+                data['partOf'] = replies_url
+                data['items'] = [note.get_absolute_url() for note in page.object_list]
+                return JsonResponse(data, content_type="application/activity+json")
+            else:
+                return JsonResponse({'error': f'invalid page number {page_num}'}, status=404)
+
+
 def followers(request, username):
     try:
         actor = LocalActor.objects.get(preferred_username=username)
@@ -409,7 +453,7 @@ def outbox(request, username):
             data['next'] = outbox_url + f'?page={page.next_page_number()}'
         data['id'] = outbox_url + f'?page={page_num}'
         data['type'] = 'OrderedCollectionPage'
-        data['orderedItems'] = [note.as_json(base_uri) for note in page.object_list]
+        data['orderedItems'] = [note.as_json(base_uri, mode='activity') for note in page.object_list]
         data['partOf'] = outbox_url
         return JsonResponse(data, content_type="application/activity+json")
     else:
