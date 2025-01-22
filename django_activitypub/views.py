@@ -225,7 +225,7 @@ def notes(request, username, id, mode = 'statuses'):
     elif mode == 'activity':
         data = note.as_json(request.build_absolute_uri, mode='activity')
     elif mode == 'replies':
-        query = Note.objects.get_children_queryset().order_by('-published_at')
+        query = Note.objects.get_children().order_by('-published_at')
         paginator = Paginator(query, 10)
         page_num_arg = request.GET.get('page', None)
         replies_url = request.build_absolute_uri(reverse('activitypub-notes-replies', kwargs={'username': username, 'id': id}))
