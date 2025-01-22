@@ -249,7 +249,7 @@ class Note(TreeNode):
 
     def get_absolute_url(self):
         if self.local_actor:
-            return f'{self.content_url}/statuses/{self.content_id}'
+            return f'https://{self.local_actor.domain}' + reverse('activitypub-notes-statuses', kwargs={'username': self.local_actor.preferred_username, 'id': self.content_id})
         return self.content_url
 
     def as_json(self, base_uri, mode = 'activity'):
