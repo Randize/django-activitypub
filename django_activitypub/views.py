@@ -215,7 +215,7 @@ def profile(request, username):
     return JsonResponse(data, content_type="application/activity+json")
 
 
-def notes(request, id, mode = 'statuses'):
+def notes(request, username, id, mode = 'statuses'):
     try:
         note = Note.objects.get(content_id=id)
     except:
@@ -228,7 +228,7 @@ def notes(request, id, mode = 'statuses'):
         query = Note.objects.get_children_queryset().order_by('-published_at')
         paginator = Paginator(query, 10)
         page_num_arg = request.GET.get('page', None)
-        replies_url = request.build_absolute_uri(reverse('activitypub-notes-replies', kwargs={'username': note.local_actor, 'id': id}))
+        replies_url = request.build_absolute_uri(reverse('activitypub-notes-replies', kwargs={'username': username, 'id': id}))
         data = {
             '@context': 'https://www.w3.org/ns/activitystreams',
             'id': replies_url,
