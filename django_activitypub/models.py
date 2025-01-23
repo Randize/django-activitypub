@@ -316,7 +316,7 @@ class Note(TreeNode):
             data['shares'] = {
                 'id': f'https://{self.local_actor.domain}' + reverse('activitypub-notes-shares', kwargs={'username': self.local_actor.preferred_username, 'id': self.content_id}),
                 'type': 'Collection',
-                'totalItems': self.likes.count()
+                'totalItems': self.announces.count()
             }
         return data
 
