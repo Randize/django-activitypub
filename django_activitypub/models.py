@@ -284,7 +284,7 @@ class Note(TreeNode):
             object['inReplyTo'] = self.parent.content_url
         if mode == 'activity':
             data = {
-                'id': f'{self.content_url}/statuses/{self.content_id}',
+                'id': f'https://{self.local_actor.domain}' + reverse('activitypub-notes-statuses', kwargs={'username': self.local_actor.preferred_username, 'id': self.content_id}),
                 'type': 'Create',
                 'actor': self.local_actor.account_url,
                 'published': format_datetime(self.published_at),
@@ -307,6 +307,17 @@ class Note(TreeNode):
                         'items': []
                     }
                 }
+            
+            data['likes'] = {
+                'id': f'https://{self.local_actor.domain}' + reverse('activitypub-notes-likes', kwargs={'username': self.local_actor.preferred_username, 'id': self.content_id}),
+                'type': 'Collection',
+                'totalItems': self.likes.count()
+            }
+            data['shares'] = {
+                'id': f'https://{self.local_actor.domain}' + reverse('activitypub-notes-shares', kwargs={'username': self.local_actor.preferred_username, 'id': self.content_id}),
+                'type': 'Collection',
+                'totalItems': self.likes.count()
+            }
         return data
 
     @property

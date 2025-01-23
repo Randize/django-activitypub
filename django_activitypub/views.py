@@ -224,6 +224,10 @@ def notes(request, username, id, mode = 'statuses'):
         data = note.as_json(request.build_absolute_uri, mode='statuses')
     elif mode == 'activity':
         data = note.as_json(request.build_absolute_uri, mode='activity')
+    elif mode == 'likes':
+        pass
+    elif mode == 'shares':
+        pass
     elif mode == 'replies':
         query = note.children.order_by('-published_at')
         paginator = Paginator(query, 10)
