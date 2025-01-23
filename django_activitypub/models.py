@@ -357,16 +357,11 @@ def parse_mentions(content):
 
 def send_create_note_to_followers(base_url, note):
     actor_url = f'{base_url}{note.local_actor.get_absolute_url()}'
-    create_msg = {
-        '@context': [
-            'https://www.w3.org/ns/activitystreams',
-            'https://w3id.org/security/v1'
-        ],
-        'type': 'Create',
-        'id': f'{base_url}/{uuid.uuid4()}', #TODO: record uuid here for views and updates
-        'actor': actor_url,
-        'object': note.as_json(base_url)
-    }
+    data = {'@context' : [
+        'https://www.w3.org/ns/activitystreams',
+        'https://w3id.org/security/v1'
+    ]}
+    data.update(note.as_json(base_url, mode='activity'))
 
     for follower in note.local_actor.followers.all():
         try:
@@ -374,7 +369,7 @@ def send_create_note_to_followers(base_url, note):
                 follower.profile.get('inbox'),
                 note.local_actor.private_key.encode('utf-8'),
                 f'{actor_url}#main-key',
-                body=json.dumps(create_msg)
+                body=json.dumps(data)
             )
             resp.raise_for_status()
         except Exception as e:  # TODO: handle 404 and delete followers 
