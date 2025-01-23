@@ -225,9 +225,19 @@ def notes(request, username, id, mode = 'statuses'):
     elif mode == 'activity':
         data = note.as_json(request.build_absolute_uri, mode='activity')
     elif mode == 'likes':
-        pass
+        data = {
+            "@context": "https://www.w3.org/ns/activitystreams",
+            "id": request.build_absolute_uri(reverse('activitypub-notes-likes', kwargs={'username': username, 'id': id})),
+            "type": "Collection",
+            "totalItems": note.likes.count()
+        }
     elif mode == 'shares':
-        pass
+        data = {
+            "@context": "https://www.w3.org/ns/activitystreams",
+            'id': request.build_absolute_uri(reverse('activitypub-notes-shares', kwargs={'username': username, 'id': id})),
+            'type': 'Collection',
+            'totalItems': note.announces.count()
+        }
     elif mode == 'replies':
         query = note.children.order_by('-published_at')
         paginator = Paginator(query, 10)
