@@ -201,7 +201,7 @@ class NoteManager(TreeQuerySet):
             note.content = content
         except Note.DoesNotExist:
             note = Note(local_actor=local_actor, content=content, content_url=content_url)
-        note.save()
+        note.save(url=base_url, note=note)
         return note
 
     def delete_local(self, base_url, content_url):
@@ -228,7 +228,7 @@ class NoteManager(TreeQuerySet):
                 note.parent = get_with_url(reply_url)
             else:
                 note.parent = Note.objects.upsert_remote(base_url, get_object(reply_url))
-        note.save()
+        note.save(url=base_url, note=note)
         return note
     
 
@@ -342,15 +342,23 @@ class Note(TreeNode):
     def max_depth(self):
         return min(getattr(self, 'tree_depth', 1), 5)
 
-    # def save(self, *args, **kwargs):
-    #     url = kwargs.pop('url', None)
-    #     note = kwargs.pop('note', None)
-    #     if not (url and note):
-    #         url = settings.SITE_URL
-    #         note = self
-    #     send_create_note_to_followers(url, note)
-    #     print(f'save() - {url} - {note.content}')
-    #     super().save(*args, **kwargs)
+    def save(self, *args, **kwargs):
+        url = kwargs.pop('url', None)
+        note = kwargs.pop('note', None)
+        if not self.pk and not (url and note):
+            url = settings.SITE_URL
+            note = self
+        send_create_note_to_followers(url, note)
+        print(f'save() - {url} - {note.content}')
+        super().save(*args, **kwargs)
+
+        try:
+            super().save(*args, **kwargs)  # Save the object
+            if self.pk:  # Only send the note if the object is successfully created
+                    send_create_note_to_followers(url, note)
+            print(f'save() - {url} - {note.content}')
+        except Exception as e:
+            print(f"save() error: {e}")
     
 def parse_hashtags(content, base_url):
     for t in re.findall(r'#\w+', content):
