@@ -397,8 +397,9 @@ def send_create_note_to_followers(base_url, note):
             )
             resp.raise_for_status()
         except Exception as e: 
-            if re.findall(r'Not Found', str(e)):
-                follower.delete()
+            # TODO: gracefully handle deleted followers so replies stay
+            # if re.findall(r'Not Found', str(e)):
+            #     follower.delete()
             print(str(e))
 
 def send_update_note_to_followers(base_url, note):
