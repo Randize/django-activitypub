@@ -361,7 +361,7 @@ def inbox(request, username):
 
         elif activity['type'] == 'Like':
             if activity['object'].startswith(base_url):
-                note = get_object_or_404(get_with_url(activity['object']))
+                note = get_with_url(activity['object'])
             else:
                 note = get_object_or_404(Note, content_url=activity['object'])
             if not note:
