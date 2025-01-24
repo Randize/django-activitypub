@@ -342,15 +342,15 @@ class Note(TreeNode):
     def max_depth(self):
         return min(getattr(self, 'tree_depth', 1), 5)
 
-    def save(self, *args, **kwargs):
-        url = kwargs.pop('url', None)
-        note = kwargs.pop('note', None)
-        if not (url and note):
-            url = settings.SITE_URL
-            note = self
-        send_create_note_to_followers(url, note)
-        print(f'save() - {url} - {note.content}')
-        super().save(*args, **kwargs)
+    # def save(self, *args, **kwargs):
+    #     url = kwargs.pop('url', None)
+    #     note = kwargs.pop('note', None)
+    #     if not (url and note):
+    #         url = settings.SITE_URL
+    #         note = self
+    #     send_create_note_to_followers(url, note)
+    #     print(f'save() - {url} - {note.content}')
+    #     super().save(*args, **kwargs)
     
 def parse_hashtags(content, base_url):
     for t in re.findall(r'#\w+', content):
