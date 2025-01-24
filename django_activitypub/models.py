@@ -369,22 +369,21 @@ def parse_mentions(content):
 def send_create_note_to_followers(base_url, note):
     actor_url = note.actor.get_absolute_url()
     if note.local_actor:
-        targets = note.local_actor.followers.all()
+        actor = note.local_actor
     elif note.parent and note.parent.local_actor:
-        targets = note.parent.local_actor.followers.all()
-    else:
-        targets = [note.parent.actor]
+        actor = note.parent.local_actor
+    followers = actor.followers.all()
     data = {'@context' : [
         'https://www.w3.org/ns/activitystreams',
         'https://w3id.org/security/v1'
     ]}
     data.update(note.as_json(base_url, mode='activity'))
 
-    for target in targets:
+    for follower in followers:
         try:
             resp = signed_post(
-                target.profile.get('inbox'),
-                note.local_actor.private_key.encode('utf-8'),
+                follower.profile.get('inbox'),
+                actor.private_key.encode('utf-8'),
                 f'{actor_url}#main-key',
                 body=json.dumps(data)
             )
