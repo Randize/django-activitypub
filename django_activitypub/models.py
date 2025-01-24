@@ -60,7 +60,7 @@ class LocalActor(models.Model):
 
     @property
     def account_url(self):
-        return f'https://{self.domain}{self.get_absolute_url()}'
+        return self.get_absolute_url()
 
     @property
     def icon_url(self):
@@ -70,7 +70,7 @@ class LocalActor(models.Model):
         return self.preferred_username
 
     def get_absolute_url(self):
-        return reverse('activitypub-profile', kwargs={'username': self.preferred_username})
+        return f'https://{self.domain}' + reverse('activitypub-profile', kwargs={'username': self.preferred_username})
 
     def save(self, *args, **kwargs):
         if not self.id:
@@ -365,7 +365,7 @@ def parse_mentions(content):
 
 def send_create_note_to_followers(base_url, note):
     if note.local_actor:
-        actor_url = f'{base_url}{note.local_actor.get_absolute_url()}'
+        actor_url = note.local_actor.get_absolute_url()
     else:
         actor_url = note.remote_actor.url
     data = {'@context' : [
@@ -387,7 +387,7 @@ def send_create_note_to_followers(base_url, note):
             print(str(e))
 
 def send_update_note_to_followers(base_url, note):
-    actor_url = f'{base_url}{note.local_actor.get_absolute_url()}'
+    actor_url = note.local_actor.get_absolute_url()
     update_msg = {
         '@context': [
             'https://www.w3.org/ns/activitystreams',
@@ -413,7 +413,7 @@ def send_update_note_to_followers(base_url, note):
 
 
 def send_delete_note_to_followers(base_url, note):
-    actor_url = f'{base_url}{note.local_actor.get_absolute_url()}'
+    actor_url = note.local_actor.get_absolute_url()
     delete_msg = {
         '@context': [
             'https://www.w3.org/ns/activitystreams',
