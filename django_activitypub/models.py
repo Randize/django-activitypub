@@ -169,6 +169,9 @@ class RemoteActor(models.Model):
     @property
     def preferred_username(self):
         return self.profile.get('preferredUsername', self.username)
+    
+    def get_absolute_url(self):
+        return self.account_url
 
 
 class Follower(models.Model):
@@ -364,20 +367,21 @@ def parse_mentions(content):
 
 
 def send_create_note_to_followers(base_url, note):
+    actor_url = note.actor.get_absolute_url()
     if note.local_actor:
-        actor_url = note.local_actor.get_absolute_url()
-    else:
-        actor_url = note.remote_actor.url
+        targets = note.local_actor.followers.all()
+    if note.parent:
+        targets = [note.parent.actor]
     data = {'@context' : [
         'https://www.w3.org/ns/activitystreams',
         'https://w3id.org/security/v1'
     ]}
     data.update(note.as_json(base_url, mode='activity'))
 
-    for follower in note.local_actor.followers.all():
+    for target in targets:
         try:
             resp = signed_post(
-                follower.profile.get('inbox'),
+                target.profile.get('inbox'),
                 note.local_actor.private_key.encode('utf-8'),
                 f'{actor_url}#main-key',
                 body=json.dumps(data)
@@ -387,7 +391,10 @@ def send_create_note_to_followers(base_url, note):
             print(str(e))
 
 def send_update_note_to_followers(base_url, note):
-    actor_url = note.local_actor.get_absolute_url()
+    if note.local_actor:
+        actor_url = note.local_actor.get_absolute_url()
+    else:
+        actor_url = note.remote_actor.url
     update_msg = {
         '@context': [
             'https://www.w3.org/ns/activitystreams',
