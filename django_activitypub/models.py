@@ -296,7 +296,7 @@ class Note(TreeNode):
             object['inReplyToAtomUri'] = self.parent.content_url
         if mode == 'activity' or mode == 'update':
             data = {
-                'id': f'https://{self.actor.domain}' + reverse('activitypub-notes-statuses', kwargs={'username': self.actor.preferred_username, 'id': self.content_id}),
+                'id': f'https://{self.actor.domain}' + reverse('activitypub-notes-activity', kwargs={'username': self.actor.preferred_username, 'id': self.content_id}),
                 'type': 'Create',
                 'actor': self.actor.account_url,
                 'published': format_datetime(published),
