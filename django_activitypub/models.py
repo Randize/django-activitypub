@@ -292,6 +292,7 @@ class Note(TreeNode):
         }
         if self.parent:
             object['inReplyTo'] = self.parent.content_url
+            object['inReplyToAtomUri'] = self.parent.content_url
         if mode == 'activity':
             data = {
                 'id': f'https://{self.actor.domain}' + reverse('activitypub-notes-statuses', kwargs={'username': self.actor.preferred_username, 'id': self.content_id}),
