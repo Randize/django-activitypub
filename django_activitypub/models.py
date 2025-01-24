@@ -201,7 +201,7 @@ class NoteManager(TreeQuerySet):
             note.content = content
         except Note.DoesNotExist:
             note = Note(local_actor=local_actor, content=content, content_url=content_url)
-        note.save(url=base_url, note=note)
+        note.save()
         return note
 
     def delete_local(self, base_url, content_url):
@@ -228,7 +228,7 @@ class NoteManager(TreeQuerySet):
                 note.parent = get_with_url(reply_url)
             else:
                 note.parent = Note.objects.upsert_remote(base_url, get_object(reply_url))
-        note.save(url=base_url, note=note)
+        note.save()
         return note
     
 
