@@ -7,6 +7,7 @@ from django.urls import resolve, reverse
 from django.contrib.auth import get_user_model
 from django.db import models
 from django.utils import timezone
+from django.conf import settings
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives import serialization
 from tree_queries.models import TreeNode, TreeQuerySet
@@ -198,9 +199,9 @@ class NoteManager(TreeQuerySet):
             note = self.get(content_url=content_url)
             note.updated_at = timezone.now()
             note.content = content
-            note.save(url=base_url, note=note)
         except Note.DoesNotExist:
-            note = super().create(local_actor=local_actor, content=content, content_url=content_url)
+            note = Note(local_actor=local_actor, content=content, content_url=content_url)
+        note.save(url=base_url, note=note)
         return note
 
     def delete_local(self, base_url, content_url):
@@ -340,11 +341,13 @@ class Note(TreeNode):
     def save(self, *args, **kwargs):
         url = kwargs.pop('url', None)
         note = kwargs.pop('note', None)
-        if url and note:
-            if self.pk:
-                send_update_note_to_followers(url, note)
-            else:
-                send_create_note_to_followers(url, note)
+        if not (url and note):
+            url = settings.SITE_URL
+            note = self
+        if self.pk:
+            send_update_note_to_followers(url, note)
+        else:
+            send_create_note_to_followers(url, note)
         super().save(*args, **kwargs)
     
 def parse_hashtags(content, base_url):
