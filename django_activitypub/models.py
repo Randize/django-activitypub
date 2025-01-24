@@ -355,7 +355,7 @@ class Note(TreeNode):
         try:
             super().save(*args, **kwargs)  # Save the object
             if self.pk:  # Only send the note if the object is successfully created
-                    send_create_note_to_followers(url, note)
+                send_create_note_to_followers(url, note)
             print(f'save() - {url} - {note.content}')
         except Exception as e:
             print(f"save() error: {e}")
