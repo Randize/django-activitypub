@@ -313,6 +313,7 @@ def inbox(request, username):
     response = {}
 
     if request.method == 'POST':
+        base_url = f'{request.scheme}://{request.get_host()}'
         activity = json.loads(request.body)
 
         try:
@@ -383,7 +384,6 @@ def inbox(request, username):
             response['ok'] = True
 
         elif activity['type'] == 'Create':
-            base_url = f'{request.scheme}://{request.get_host()}'
             if activity['object']['id'].startswith(base_url):
                 pass  # there is nothing to do, this is our note
             else:
