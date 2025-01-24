@@ -166,6 +166,10 @@ class RemoteActor(models.Model):
     def icon_url(self):
         return self.profile.get('icon', {}).get('url', None)
 
+    @property
+    def preferredUsername(self):
+        return self.profile.get('preferredUsername', self.username)
+
 
 class Follower(models.Model):
     remote_actor = models.ForeignKey(RemoteActor, on_delete=models.CASCADE)
