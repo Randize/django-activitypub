@@ -11,7 +11,7 @@ from django.shortcuts import get_object_or_404
 from django.urls import reverse, resolve
 from django.core.paginator import Paginator
 from django.views.decorators.csrf import csrf_exempt
-from django_activitypub.models import ActorChoices, LocalActor, RemoteActor, Follower, Note
+from django_activitypub.models import ActorChoices, LocalActor, RemoteActor, Follower, Note, get_with_url
 from django_activitypub.signed_requests import signed_post, SignatureChecker
 from django_activitypub.webfinger import fetch_remote_profile, WebfingerException
 from django.utils.safestring import mark_safe
@@ -361,7 +361,7 @@ def inbox(request, username):
 
         elif activity['type'] == 'Like':
             if activity['object'].startswith(base_url):
-                note = get_object_or_404(Note.get_with_url(activity['object']))
+                note = get_object_or_404(get_with_url(activity['object']))
             else:
                 note = get_object_or_404(Note, content_url=activity['object'])
             if not note:
