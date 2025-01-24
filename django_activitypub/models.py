@@ -299,7 +299,7 @@ class Note(TreeNode):
                 'id': f'https://{self.actor.domain}' + reverse('activitypub-notes-statuses', kwargs={'username': self.actor.preferred_username, 'id': self.content_id}),
                 'type': 'Create',
                 'actor': self.actor.account_url,
-                'published': format_datetime(self.published_at),
+                'published': format_datetime(published),
                 'to': 'https://www.w3.org/ns/activitystreams#Public',
                 'cc': f'https://{self.actor.domain}' + reverse('activitypub-followers', kwargs={'username': self.actor.preferred_username}),
                 'object': object
