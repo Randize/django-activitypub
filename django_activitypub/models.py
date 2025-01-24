@@ -348,10 +348,7 @@ class Note(TreeNode):
         if not (url and note):
             url = settings.SITE_URL
             note = self
-        if self.pk:
-            send_update_note_to_followers(url, note)
-        else:
-            send_create_note_to_followers(url, note)
+        send_create_note_to_followers(url, note)
         print(f'save() - {url} - {note.content}')
         super().save(*args, **kwargs)
     
@@ -404,7 +401,7 @@ def send_create_note_to_followers(base_url, note):
                 body=json.dumps(data)
             )
             resp.raise_for_status()
-            print(f'send_create_note_to_followers - {follower.__str__}')
+            print(f'send_create_note_to_followers - {follower.__str__()}')
         except Exception as e: 
             # TODO: gracefully handle deleted followers so replies stay
             # if re.findall(r'Not Found', str(e)):
@@ -436,7 +433,7 @@ def send_update_note_to_followers(base_url, note):
                 body=json.dumps(update_msg)
             )
             resp.raise_for_status()
-            print(f'send_update_note_to_followers - {follower.__str__}')
+            print(f'send_update_note_to_followers - {follower.__str__()}')
         except Exception as e:  # TODO: handle 404 and delete followers 
             print(str(e))
 
