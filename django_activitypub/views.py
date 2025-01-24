@@ -360,6 +360,8 @@ def inbox(request, username):
             response['ok'] = True
 
         elif activity['type'] == 'Like':
+            if activity['object'].startswith(base_url):
+                pass
             note = get_object_or_404(Note, content_url=activity['object'])
             if not note:
                 return JsonResponse({'error': f'like object is not a note: {activity["object"]}'}, status=400)

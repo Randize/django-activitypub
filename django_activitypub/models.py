@@ -225,9 +225,7 @@ class NoteManager(TreeQuerySet):
         note.content_url = obj['id']
         if reply_url := full_obj.get('inReplyTo', None):
             if reply_url.startswith(base_url):
-                parsed = urllib.parse.urlparse(reply_url)
-                match = resolve(parsed.path)
-                note.parent = self.get(content_id=match.kwargs['id'])
+                note.parent = self.get_with_url(reply_url)
             else:
                 note.parent = Note.objects.upsert_remote(base_url, get_object(reply_url))
         note.save()
@@ -256,6 +254,11 @@ class Note(TreeNode):
 
     def __str__(self):
         return self.get_absolute_url()
+    
+    def get_with_url(self, url):
+        parsed = urllib.parse.urlparse(url)
+        match = resolve(parsed.path)
+        return self.get(content_id=match.kwargs['id'])
 
     def get_absolute_url(self):
         if self.local_actor:
