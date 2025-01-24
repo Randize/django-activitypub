@@ -254,11 +254,6 @@ class Note(TreeNode):
 
     def __str__(self):
         return self.get_absolute_url()
-    
-    def get_with_url(self, url):
-        parsed = urllib.parse.urlparse(url)
-        match = resolve(parsed.path)
-        return self.get(content_id=match.kwargs['id'])
 
     def get_absolute_url(self):
         if self.local_actor:
@@ -457,3 +452,9 @@ def get_object(url):
     resp = requests.get(url, headers={'Accept': 'application/activity+json'})
     resp.raise_for_status()
     return resp.json()
+
+    
+def get_with_url(url):
+    parsed = urllib.parse.urlparse(url)
+    match = resolve(parsed.path)
+    return Note.objects.get(content_id=match.kwargs['id'])
