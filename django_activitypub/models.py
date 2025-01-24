@@ -257,9 +257,11 @@ class Note(TreeNode):
 
     def as_json(self, base_uri, mode = 'activity'):
         if self.local_actor:
-            attributed = self.local_actor.get_absolute_url()
+            actor = self.local_actor
+            attributed = actor.get_absolute_url()
         else:
-            attributed = self.remote_actor.url
+            actor = self.remote_actor
+            attributed = actor.url
         object = {
             'id': self.get_absolute_url(), # TODO: handle remote & local content_url
             'type': 'Note',
@@ -270,7 +272,7 @@ class Note(TreeNode):
             'updated': format_datetime(self.updated_at),
             'attributedTo': attributed,
             'to': 'https://www.w3.org/ns/activitystreams#Public',
-            'cc': f'https://{self.local_actor.domain}' + reverse('activitypub-followers', kwargs={'username': self.local_actor.preferred_username}),
+            'cc': f'https://{actor.domain}' + reverse('activitypub-followers', kwargs={'username': self.local_actor.preferred_username}),
             'sensitive': self.sensitive,
             'atomUri': self.content_url,
             'inReplyToAtomUri': None,
@@ -287,18 +289,18 @@ class Note(TreeNode):
             object['inReplyTo'] = self.parent.content_url
         if mode == 'activity':
             data = {
-                'id': f'https://{self.local_actor.domain}' + reverse('activitypub-notes-statuses', kwargs={'username': self.local_actor.preferred_username, 'id': self.content_id}),
+                'id': f'https://{actor.domain}' + reverse('activitypub-notes-statuses', kwargs={'username': self.local_actor.preferred_username, 'id': self.content_id}),
                 'type': 'Create',
                 'actor': self.local_actor.account_url,
                 'published': format_datetime(self.published_at),
                 'to': 'https://www.w3.org/ns/activitystreams#Public',
-                'cc': f'https://{self.local_actor.domain}' + reverse('activitypub-followers', kwargs={'username': self.local_actor.preferred_username}),
+                'cc': f'https://{actor.domain}' + reverse('activitypub-followers', kwargs={'username': self.local_actor.preferred_username}),
                 'object': object
             }
         elif mode == 'statuses':
             data = object
             if self.children:
-                replies_url = f'https://{self.local_actor.domain}' + reverse('activitypub-notes-replies', kwargs={'username': self.local_actor.preferred_username, 'id': self.content_id})
+                replies_url = f'https://{actor.domain}' + reverse('activitypub-notes-replies', kwargs={'username': self.local_actor.preferred_username, 'id': self.content_id})
                 data['replies'] = {
                     'id': replies_url,
                     'type': 'Collection',
@@ -312,12 +314,12 @@ class Note(TreeNode):
                 }
             
             data['likes'] = {
-                'id': f'https://{self.local_actor.domain}' + reverse('activitypub-notes-likes', kwargs={'username': self.local_actor.preferred_username, 'id': self.content_id}),
+                'id': f'https://{actor.domain}' + reverse('activitypub-notes-likes', kwargs={'username': self.local_actor.preferred_username, 'id': self.content_id}),
                 'type': 'Collection',
                 'totalItems': self.likes.count()
             }
             data['shares'] = {
-                'id': f'https://{self.local_actor.domain}' + reverse('activitypub-notes-shares', kwargs={'username': self.local_actor.preferred_username, 'id': self.content_id}),
+                'id': f'https://{actor.domain}' + reverse('activitypub-notes-shares', kwargs={'username': self.local_actor.preferred_username, 'id': self.content_id}),
                 'type': 'Collection',
                 'totalItems': self.announces.count()
             }
@@ -360,7 +362,10 @@ def parse_mentions(content):
 
 
 def send_create_note_to_followers(base_url, note):
-    actor_url = f'{base_url}{note.local_actor.get_absolute_url()}'
+    if note.local_actor:
+        actor_url = f'{base_url}{note.local_actor.get_absolute_url()}'
+    else:
+        actor_url = note.remote_actor.url
     data = {'@context' : [
         'https://www.w3.org/ns/activitystreams',
         'https://w3id.org/security/v1'
