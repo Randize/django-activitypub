@@ -10,6 +10,7 @@ from django.utils import timezone
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives import serialization
 from tree_queries.models import TreeNode, TreeQuerySet
+from datetime import datetime
 
 from django_activitypub.signed_requests import signed_post
 from django_activitypub.utils.dates import format_datetime, parse_datetime
@@ -272,7 +273,7 @@ class Note(TreeNode):
             'summary': None,
             'inReplyTo': None,
             'published': format_datetime(self.published_at),
-            'updated': format_datetime(self.updated_at),
+            'updated': None,
             'attributedTo': attributed,
             'to': 'https://www.w3.org/ns/activitystreams#Public',
             'cc': f'https://{self.actor.domain}' + reverse('activitypub-followers', kwargs={'username': self.actor.preferred_username}),
@@ -291,7 +292,7 @@ class Note(TreeNode):
         if self.parent:
             object['inReplyTo'] = self.parent.content_url
             object['inReplyToAtomUri'] = self.parent.content_url
-        if mode == 'activity':
+        if mode == 'activity' or mode == 'update':
             data = {
                 'id': f'https://{self.actor.domain}' + reverse('activitypub-notes-statuses', kwargs={'username': self.actor.preferred_username, 'id': self.content_id}),
                 'type': 'Create',
@@ -301,6 +302,8 @@ class Note(TreeNode):
                 'cc': f'https://{self.actor.domain}' + reverse('activitypub-followers', kwargs={'username': self.actor.preferred_username}),
                 'object': object
             }
+            if mode == 'update':
+                data['updated'] = format_datetime(datetime.now())
         elif mode == 'statuses':
             data = object
             if self.children:
