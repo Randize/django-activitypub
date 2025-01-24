@@ -218,12 +218,14 @@ class NoteManager(TreeQuerySet):
         note.content_url = obj['id']
         if reply_url := full_obj.get('inReplyTo', None):
             if reply_url.startswith(base_uri):
-                note.parent = self.get(content_url=reply_url)
+                parsed = urllib.parse.urlparse(reply_url)
+                match = resolve(parsed.path)
+                note.parent = self.get(content_id=match.kwargs['id'])
             else:
                 note.parent = Note.objects.upsert_remote(base_uri, get_object(reply_url))
         note.save()
         return note
-
+    
 
 class Note(TreeNode):
     local_actor = models.ForeignKey(LocalActor, on_delete=models.CASCADE, null=True, blank=True, related_name='notes')
@@ -231,7 +233,7 @@ class Note(TreeNode):
     published_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     content = models.TextField()
-    content_url = models.URLField(db_index=True)
+    content_url = models.URLField(db_index=True, help_text="The absolute URL of the content to be published.")
     content_id = models.CharField(max_length=18, unique=True, default=str(uuid.uuid4().int)[:18], editable=False)
     likes = models.ManyToManyField(RemoteActor, blank=True, related_name='likes')
     announces = models.ManyToManyField(RemoteActor, blank=True, related_name='announces')
@@ -327,6 +329,7 @@ class Note(TreeNode):
     @property
     def max_depth(self):
         return min(getattr(self, 'tree_depth', 1), 5)
+    
 
 def parse_hashtags(content, base_url):
     for t in re.findall(r'#\w+', content):
