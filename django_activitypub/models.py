@@ -404,6 +404,7 @@ def send_create_note_to_followers(base_url, note):
                 body=json.dumps(data)
             )
             resp.raise_for_status()
+            print(f'send_create_note_to_followers - {follower.__str__}')
         except Exception as e: 
             # TODO: gracefully handle deleted followers so replies stay
             # if re.findall(r'Not Found', str(e)):
@@ -435,6 +436,7 @@ def send_update_note_to_followers(base_url, note):
                 body=json.dumps(update_msg)
             )
             resp.raise_for_status()
+            print(f'send_update_note_to_followers - {follower.__str__}')
         except Exception as e:  # TODO: handle 404 and delete followers 
             print(str(e))
 
