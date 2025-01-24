@@ -374,7 +374,10 @@ def inbox(request, username):
             response['ok'] = True
 
         elif activity['type'] == 'Announce':
-            note = get_object_or_404(Note, content_url=activity['object'])
+            if activity['object'].startswith(base_url):
+                note = get_with_url(activity['object'])
+            else:
+                note = get_object_or_404(Note, content_url=activity['object'])
             if not note:
                 return JsonResponse({'error': f'announce object is not a note: {activity["object"]}'}, status=400)
 
@@ -405,7 +408,10 @@ def inbox(request, username):
                 response['ok'] = True
 
             elif to_undo['type'] == 'Like':
-                note = get_object_or_404(Note, content_url=to_undo['object'])
+                if activity['object'].startswith(base_url):
+                    note = get_with_url(activity['object'])
+                else:
+                    note = get_object_or_404(Note, content_url=to_undo['object'])
                 if not note:
                     return JsonResponse({'error': f'undo like object is not a note: {to_undo["object"]}'}, status=400)
 
@@ -415,7 +421,10 @@ def inbox(request, username):
                 response['ok'] = True
 
             elif to_undo['type'] == 'Announce':
-                note = get_object_or_404(Note, content_url=to_undo['object'])
+                if activity['object'].startswith(base_url):
+                    note = get_with_url(activity['object'])
+                else:
+                    note = get_object_or_404(Note, content_url=to_undo['object'])
                 if not note:
                     return JsonResponse({'error': f'undo announce object is not a note: {to_undo["object"]}'}, status=400)
 
