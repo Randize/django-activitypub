@@ -388,7 +388,9 @@ def send_create_note_to_followers(base_url, note):
                 body=json.dumps(data)
             )
             resp.raise_for_status()
-        except Exception as e:  # TODO: handle 404 and delete followers 
+        except Exception as e: 
+            if re.findall(r'Not Found', str(e)):
+                follower.delete()
             print(str(e))
 
 def send_update_note_to_followers(base_url, note):
