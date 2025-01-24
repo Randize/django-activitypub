@@ -352,6 +352,7 @@ class Note(TreeNode):
             send_update_note_to_followers(url, note)
         else:
             send_create_note_to_followers(url, note)
+        print(f'save() - {url} - {note.content}')
         super().save(*args, **kwargs)
     
 def parse_hashtags(content, base_url):
