@@ -473,12 +473,12 @@ def outbox(request, username):
 
     if 1 <= page_num <= paginator.num_pages:
         page = paginator.page(page_num)
-        base_uri = f'{request.scheme}://{request.get_host()}'
+        base_url = f'{request.scheme}://{request.get_host()}'
         if page.has_next():
             data['next'] = outbox_url + f'?page={page.next_page_number()}'
         data['id'] = outbox_url + f'?page={page_num}'
         data['type'] = 'OrderedCollectionPage'
-        data['orderedItems'] = [note.as_json(base_uri, mode='activity') for note in page.object_list]
+        data['orderedItems'] = [note.as_json(base_url, mode='activity') for note in page.object_list]
         data['partOf'] = outbox_url
         return JsonResponse(data, content_type="application/activity+json")
     else:

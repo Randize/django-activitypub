@@ -193,22 +193,20 @@ class Follower(models.Model):
 
 
 class NoteManager(TreeQuerySet):
-    def upsert(self, base_uri, local_actor, content, content_url):
+    def upsert(self, base_url, local_actor, content, content_url):
         try:
             note = self.get(content_url=content_url)
             note.updated_at = timezone.now()
             note.content = content
-            note.save()
-            send_update_note_to_followers(base_uri, note)
+            note.save(url=base_url, note=note)
         except Note.DoesNotExist:
             note = super().create(local_actor=local_actor, content=content, content_url=content_url)
-            send_create_note_to_followers(base_uri, note)
         return note
 
-    def delete_local(self, base_uri, content_url):
+    def delete_local(self, base_url, content_url):
         try:
             note = self.get(content_url=content_url)
-            send_delete_note_to_followers(base_uri, note)
+            send_delete_note_to_followers(base_url, note)
         except Note.DoesNotExist:
             pass
 
@@ -229,8 +227,7 @@ class NoteManager(TreeQuerySet):
                 note.parent = self.get_with_url(reply_url)
             else:
                 note.parent = Note.objects.upsert_remote(base_url, get_object(reply_url))
-        note.save()
-        send_create_note_to_followers(base_url, note)
+        note.save(url=base_url, note=note)
         return note
     
 
@@ -261,7 +258,7 @@ class Note(TreeNode):
             return f'https://{self.local_actor.domain}' + reverse('activitypub-notes-statuses', kwargs={'username': self.local_actor.preferred_username, 'id': self.content_id})
         return self.content_url
 
-    def as_json(self, base_uri, mode = 'activity'):
+    def as_json(self, base_url, mode = 'activity'):
         if self.local_actor:
             attributed = self.actor.get_absolute_url()
         else:
@@ -283,7 +280,7 @@ class Note(TreeNode):
             'conversation': None,
             'content': self.content,
             'contentMap': {},
-            'tag': list(parse_mentions(self.content)) + list(parse_hashtags(self.content, base_uri)),
+            'tag': list(parse_mentions(self.content)) + list(parse_hashtags(self.content, base_url)),
             'attachment': [],
             'replies': {}, # TODO: Need to add inbox support for replies
             'likes': {},
@@ -303,7 +300,7 @@ class Note(TreeNode):
                 'object': object
             }
             if mode == 'update':
-                data['updated'] = format_datetime(datetime.now())
+                data['updated'] = format_datetime(self.updated_at)
         elif mode == 'statuses':
             data = object
             if self.children:
@@ -339,8 +336,17 @@ class Note(TreeNode):
     @property
     def max_depth(self):
         return min(getattr(self, 'tree_depth', 1), 5)
-    
 
+    def save(self, *args, **kwargs):
+        url = kwargs.pop('url', None)
+        note = kwargs.pop('note', None)
+        if url and note:
+            if self.pk:
+                send_update_note_to_followers(url, note)
+            else:
+                send_create_note_to_followers(url, note)
+        super().save(*args, **kwargs)
+    
 def parse_hashtags(content, base_url):
     for t in re.findall(r'#\w+', content):
         yield {
@@ -407,7 +413,7 @@ def send_update_note_to_followers(base_url, note):
         'type': 'Update',
         'id': f'{note.content_url}#updates/{note.updated_at.timestamp()}',
         'actor': actor_url,
-        'object': note.as_json(base_url),
+        'object': note.as_json(base_url, mode='update'),
         'published': format_datetime(note.published_at),
     }
 
