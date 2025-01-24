@@ -408,8 +408,8 @@ def inbox(request, username):
                 response['ok'] = True
 
             elif to_undo['type'] == 'Like':
-                if activity['object'].startswith(base_url):
-                    note = get_with_url(activity['object'])
+                if to_undo['object'].startswith(base_url):
+                    note = get_with_url(to_undo['object'])
                 else:
                     note = get_object_or_404(Note, content_url=to_undo['object'])
                 if not note:
@@ -421,8 +421,8 @@ def inbox(request, username):
                 response['ok'] = True
 
             elif to_undo['type'] == 'Announce':
-                if activity['object'].startswith(base_url):
-                    note = get_with_url(activity['object'])
+                if to_undo['object'].startswith(base_url):
+                    note = get_with_url(to_undo['object'])
                 else:
                     note = get_object_or_404(Note, content_url=to_undo['object'])
                 if not note:
