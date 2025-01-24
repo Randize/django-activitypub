@@ -167,7 +167,7 @@ class RemoteActor(models.Model):
         return self.profile.get('icon', {}).get('url', None)
 
     @property
-    def preferredUsername(self):
+    def preferred_username(self):
         return self.profile.get('preferredUsername', self.username)
 
 
