@@ -264,13 +264,17 @@ class Note(TreeNode):
             attributed = self.actor.get_absolute_url()
         else:
             attributed = self.actor.url
+        if self.published_at:
+            published = self.published_at
+        else:
+            published = timezone.now()
         object = {
             'id': self.get_absolute_url(), # TODO: handle remote & local content_url
             'type': 'Note',
             'url': self.content_url,
             'summary': None,
             'inReplyTo': None,
-            'published': format_datetime(self.published_at),
+            'published': format_datetime(published),
             'updated': None,
             'attributedTo': attributed,
             'to': 'https://www.w3.org/ns/activitystreams#Public',
