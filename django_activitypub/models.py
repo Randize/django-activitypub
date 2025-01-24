@@ -224,7 +224,7 @@ class NoteManager(TreeQuerySet):
         note.content_url = obj['id']
         if reply_url := full_obj.get('inReplyTo', None):
             if reply_url.startswith(base_url):
-                note.parent = self.get_with_url(reply_url)
+                note.parent = get_with_url(reply_url)
             else:
                 note.parent = Note.objects.upsert_remote(base_url, get_object(reply_url))
         note.save(url=base_url, note=note)
