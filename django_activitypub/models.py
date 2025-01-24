@@ -370,7 +370,9 @@ def send_create_note_to_followers(base_url, note):
     actor_url = note.actor.get_absolute_url()
     if note.local_actor:
         targets = note.local_actor.followers.all()
-    if note.parent:
+    elif note.parent and note.parent.local_actor:
+        targets = note.parent.local_actor.followers.all()
+    else:
         targets = [note.parent.actor]
     data = {'@context' : [
         'https://www.w3.org/ns/activitystreams',
