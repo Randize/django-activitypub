@@ -204,7 +204,7 @@ class NoteManager(TreeQuerySet):
         except Note.DoesNotExist:
             pass
 
-    def upsert_remote(self, base_uri, obj):
+    def upsert_remote(self, base_url, obj):
         full_obj = get_object(obj['id'])
         try:
             note = self.get(content_url=full_obj['id'])
@@ -217,14 +217,14 @@ class NoteManager(TreeQuerySet):
         note.content = full_obj['content']
         note.content_url = obj['id']
         if reply_url := full_obj.get('inReplyTo', None):
-            if reply_url.startswith(base_uri):
+            if reply_url.startswith(base_url):
                 parsed = urllib.parse.urlparse(reply_url)
                 match = resolve(parsed.path)
                 note.parent = self.get(content_id=match.kwargs['id'])
             else:
-                note.parent = Note.objects.upsert_remote(base_uri, get_object(reply_url))
+                note.parent = Note.objects.upsert_remote(base_url, get_object(reply_url))
         note.save()
-        send_create_note_to_followers(base_uri, note)
+        send_create_note_to_followers(base_url, note)
         return note
     
 
@@ -257,11 +257,9 @@ class Note(TreeNode):
 
     def as_json(self, base_uri, mode = 'activity'):
         if self.local_actor:
-            actor = self.local_actor
-            attributed = actor.get_absolute_url()
+            attributed = self.actor.get_absolute_url()
         else:
-            actor = self.remote_actor
-            attributed = actor.url
+            attributed = self.actor.url
         object = {
             'id': self.get_absolute_url(), # TODO: handle remote & local content_url
             'type': 'Note',
@@ -272,7 +270,7 @@ class Note(TreeNode):
             'updated': format_datetime(self.updated_at),
             'attributedTo': attributed,
             'to': 'https://www.w3.org/ns/activitystreams#Public',
-            'cc': f'https://{actor.domain}' + reverse('activitypub-followers', kwargs={'username': self.local_actor.preferred_username}),
+            'cc': f'https://{self.actor.domain}' + reverse('activitypub-followers', kwargs={'username': self.actor.preferred_username}),
             'sensitive': self.sensitive,
             'atomUri': self.content_url,
             'inReplyToAtomUri': None,
@@ -289,18 +287,18 @@ class Note(TreeNode):
             object['inReplyTo'] = self.parent.content_url
         if mode == 'activity':
             data = {
-                'id': f'https://{actor.domain}' + reverse('activitypub-notes-statuses', kwargs={'username': self.local_actor.preferred_username, 'id': self.content_id}),
+                'id': f'https://{self.actor.domain}' + reverse('activitypub-notes-statuses', kwargs={'username': self.actor.preferred_username, 'id': self.content_id}),
                 'type': 'Create',
-                'actor': self.local_actor.account_url,
+                'actor': self.actor.account_url,
                 'published': format_datetime(self.published_at),
                 'to': 'https://www.w3.org/ns/activitystreams#Public',
-                'cc': f'https://{actor.domain}' + reverse('activitypub-followers', kwargs={'username': self.local_actor.preferred_username}),
+                'cc': f'https://{self.actor.domain}' + reverse('activitypub-followers', kwargs={'username': self.actor.preferred_username}),
                 'object': object
             }
         elif mode == 'statuses':
             data = object
             if self.children:
-                replies_url = f'https://{actor.domain}' + reverse('activitypub-notes-replies', kwargs={'username': self.local_actor.preferred_username, 'id': self.content_id})
+                replies_url = f'https://{self.actor.domain}' + reverse('activitypub-notes-replies', kwargs={'username': self.actor.preferred_username, 'id': self.content_id})
                 data['replies'] = {
                     'id': replies_url,
                     'type': 'Collection',
@@ -314,12 +312,12 @@ class Note(TreeNode):
                 }
             
             data['likes'] = {
-                'id': f'https://{actor.domain}' + reverse('activitypub-notes-likes', kwargs={'username': self.local_actor.preferred_username, 'id': self.content_id}),
+                'id': f'https://{self.actor.domain}' + reverse('activitypub-notes-likes', kwargs={'username': self.actor.preferred_username, 'id': self.content_id}),
                 'type': 'Collection',
                 'totalItems': self.likes.count()
             }
             data['shares'] = {
-                'id': f'https://{actor.domain}' + reverse('activitypub-notes-shares', kwargs={'username': self.local_actor.preferred_username, 'id': self.content_id}),
+                'id': f'https://{self.actor.domain}' + reverse('activitypub-notes-shares', kwargs={'username': self.actor.preferred_username, 'id': self.content_id}),
                 'type': 'Collection',
                 'totalItems': self.announces.count()
             }

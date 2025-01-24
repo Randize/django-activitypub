@@ -380,11 +380,11 @@ def inbox(request, username):
             response['ok'] = True
 
         elif activity['type'] == 'Create':
-            base_uri = f'{request.scheme}://{request.get_host()}'
-            if activity['object']['id'].startswith(base_uri):
+            base_url = f'{request.scheme}://{request.get_host()}'
+            if activity['object']['id'].startswith(base_url):
                 pass  # there is nothing to do, this is our note
             else:
-                Note.objects.upsert_remote(base_uri, activity['object'])
+                Note.objects.upsert_remote(base_url, activity['object'])
             response['ok'] = True
 
         elif activity['type'] == 'Undo':
