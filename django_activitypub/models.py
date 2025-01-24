@@ -367,11 +367,11 @@ def parse_mentions(content):
 
 
 def send_create_note_to_followers(base_url, note):
-    actor_url = note.actor.get_absolute_url()
     if note.local_actor:
         actor = note.local_actor
     elif note.parent and note.parent.local_actor:
         actor = note.parent.local_actor
+    actor_url = actor.get_absolute_url()
     followers = actor.followers.all()
     data = {'@context' : [
         'https://www.w3.org/ns/activitystreams',
