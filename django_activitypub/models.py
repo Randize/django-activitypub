@@ -224,6 +224,7 @@ class NoteManager(TreeQuerySet):
             else:
                 note.parent = Note.objects.upsert_remote(base_uri, get_object(reply_url))
         note.save()
+        send_create_note_to_followers(base_uri, note)
         return note
     
 

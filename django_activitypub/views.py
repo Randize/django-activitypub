@@ -385,7 +385,6 @@ def inbox(request, username):
                 pass  # there is nothing to do, this is our note
             else:
                 Note.objects.upsert_remote(base_uri, activity['object'])
-            # TODO: notify followers for replies
             response['ok'] = True
 
         elif activity['type'] == 'Undo':
