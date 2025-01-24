@@ -160,7 +160,7 @@ class RemoteActor(models.Model):
 
     @property
     def account_url(self):
-        return self.profile.get('url', '#')
+        return self.profile.get('id', '#')
 
     @property
     def icon_url(self):
