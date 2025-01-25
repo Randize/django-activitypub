@@ -287,10 +287,31 @@ class Note(TreeNode):
             'contentMap': {},
             'tag': list(parse_mentions(self.content)) + list(parse_hashtags(self.content, base_url)),
             'attachment': [],
-            'replies': {}, # TODO: Need to add inbox support for replies
-            'likes': {},
-            'shares': {},
+            'replies': {}, 
+            'likes': {
+                'id': f'https://{self.actor.domain}' + reverse('activitypub-notes-likes', kwargs={'username': self.actor.preferred_username, 'id': self.content_id}),
+                'type': 'Collection',
+                'totalItems': self.likes.count()
+            },
+            'shares': {
+                'id': f'https://{self.actor.domain}' + reverse('activitypub-notes-shares', kwargs={'username': self.actor.preferred_username, 'id': self.content_id}),
+                'type': 'Collection',
+                'totalItems': self.announces.count()
+            },
         }
+        if self.children:
+            replies_url = f'https://{self.actor.domain}' + reverse('activitypub-notes-replies', kwargs={'username': self.actor.preferred_username, 'id': self.content_id})
+            object['replies'] = {
+                'id': replies_url,
+                'type': 'Collection',
+                'first': {
+                    'id': replies_url + '?page=1',
+                    'type': 'CollectionPage',
+                    'next': replies_url + '?page=1',
+                    'partOf': replies_url,
+                    'items': []
+                }
+            }
         if self.parent:
             object['inReplyTo'] = self.parent.content_url
             object['inReplyToAtomUri'] = self.parent.content_url
@@ -308,30 +329,6 @@ class Note(TreeNode):
                 data['updated'] = format_datetime(self.updated_at)
         elif mode == 'statuses':
             data = object
-            if self.children:
-                replies_url = f'https://{self.actor.domain}' + reverse('activitypub-notes-replies', kwargs={'username': self.actor.preferred_username, 'id': self.content_id})
-                data['replies'] = {
-                    'id': replies_url,
-                    'type': 'Collection',
-                    'first': {
-                        'id': replies_url + '?page=1',
-                        'type': 'CollectionPage',
-                        'next': replies_url + '?page=1',
-                        'partOf': replies_url,
-                        'items': []
-                    }
-                }
-            
-        data['likes'] = {
-            'id': f'https://{self.actor.domain}' + reverse('activitypub-notes-likes', kwargs={'username': self.actor.preferred_username, 'id': self.content_id}),
-            'type': 'Collection',
-            'totalItems': self.likes.count()
-        }
-        data['shares'] = {
-            'id': f'https://{self.actor.domain}' + reverse('activitypub-notes-shares', kwargs={'username': self.actor.preferred_username, 'id': self.content_id}),
-            'type': 'Collection',
-            'totalItems': self.announces.count()
-        }
         return data
 
     @property
@@ -395,8 +392,7 @@ def send_create_note_to_followers(base_url, note):
     actor_url = actor.get_absolute_url()
     followers = actor.followers.all()
     data = {'@context' : [
-        'https://www.w3.org/ns/activitystreams',
-        'https://w3id.org/security/v1'
+        'https://www.w3.org/ns/activitystreams'
     ]}
     data.update(note.as_json(base_url, mode='activity'))
 
