@@ -322,16 +322,16 @@ class Note(TreeNode):
                     }
                 }
             
-            data['likes'] = {
-                'id': f'https://{self.actor.domain}' + reverse('activitypub-notes-likes', kwargs={'username': self.actor.preferred_username, 'id': self.content_id}),
-                'type': 'Collection',
-                'totalItems': self.likes.count()
-            }
-            data['shares'] = {
-                'id': f'https://{self.actor.domain}' + reverse('activitypub-notes-shares', kwargs={'username': self.actor.preferred_username, 'id': self.content_id}),
-                'type': 'Collection',
-                'totalItems': self.announces.count()
-            }
+        data['likes'] = {
+            'id': f'https://{self.actor.domain}' + reverse('activitypub-notes-likes', kwargs={'username': self.actor.preferred_username, 'id': self.content_id}),
+            'type': 'Collection',
+            'totalItems': self.likes.count()
+        }
+        data['shares'] = {
+            'id': f'https://{self.actor.domain}' + reverse('activitypub-notes-shares', kwargs={'username': self.actor.preferred_username, 'id': self.content_id}),
+            'type': 'Collection',
+            'totalItems': self.announces.count()
+        }
         return data
 
     @property
@@ -402,14 +402,18 @@ def send_create_note_to_followers(base_url, note):
 
     for follower in followers:
         try:
+            inbox = follower.profile.get('endpoints')['sharedInbox']
+        except:
+            inbox = follower.profile.get('inbox')
+        try:
             resp = signed_post(
-                follower.profile.get('inbox'),
+                inbox,
                 actor.private_key.encode('utf-8'),
                 f'{actor_url}#main-key',
                 body=json.dumps(data)
             )
             resp.raise_for_status()
-            print(f'send_create_note_to_followers - {follower.__str__()}')
+            print(f'send_create_note_to_followers - {follower.__str__()} - {resp.status_code}')
         except Exception as e: 
             # TODO: gracefully handle deleted followers so replies stay
             # if re.findall(r'Not Found', str(e)):
