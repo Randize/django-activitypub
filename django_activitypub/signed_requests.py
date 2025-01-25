@@ -80,6 +80,16 @@ def signed_post(url, private_key, public_key_url, headers=None, body='', method=
     content_type = "application/activity+json"
     date_header = get_gmt_now()
 
+    # TODO:
+    # body.update({
+    #     'signature': {
+    #         "type":"RsaSignature2017",
+    #         "creator":"https://activitypub.academy/users/dibussia_insunul#main-key",
+    #         "created":"2025-01-25T05:53:42Z",
+    #         "signatureValue":"SUppOGhomenQjMTVUGGvZnxMu/y8CLe73QlLsw6NEJSyel9F7AoegS2rNsBuAqAQD/+SbMLwkRkkCUkyvZmlukDu134ouMr+CRcEK6p1LKs7dQXOUQNAhqIyyFf7S0ToxZxj2I0Gk1J9QV5M9gwIv4qLHSv4/RGb0uQEbrSz8ebJddmqZzaqqDmtU4lUgbXepe5ifY2srACuRsptVlt1mfQ5cTXLN8VJq23EVjH1L2J9+RunuOke30vAI5MTLEjt8bo1u4tRPhAsT1inVQx/+0V1T228K2xo888TtYSv+gwEbl4Hn85UfyGXgZggdq1C9aO62RtQZJgdopnknHutHA=="
+    #     }
+    # })
+
     digest = content_digest_sha256(body)
 
     signature_header = (
