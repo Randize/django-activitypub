@@ -275,7 +275,6 @@ class Note(TreeNode):
             'summary': None,
             'inReplyTo': None,
             'published': format_datetime(published),
-            'updated': None,
             'attributedTo': attributed,
             'to': 'https://www.w3.org/ns/activitystreams#Public',
             'cc': f'https://{self.actor.domain}' + reverse('activitypub-followers', kwargs={'username': self.actor.preferred_username}),
