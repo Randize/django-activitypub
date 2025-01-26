@@ -48,6 +48,10 @@ class LocalActor(models.Model):
         'RemoteActor', through='Follower', related_name='followers',
         through_fields=('following', 'remote_actor'),
     )
+    followings = models.ManyToManyField(
+        'RemoteActor', through='Following', related_name='followings',
+        through_fields=('following', 'remote_actor'),
+    )
 
     objects = LocalActorManager()
 
@@ -191,6 +195,23 @@ class Follower(models.Model):
 
     def __str__(self):
         return f'{self.remote_actor} -> {self.following}'
+    
+
+class Following(models.Model):
+    remote_actor = models.ForeignKey(RemoteActor, on_delete=models.CASCADE)
+    following = models.ForeignKey(LocalActor, on_delete=models.CASCADE)
+    follow_date = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['following', 'remote_actor'], name='activitypub_unique_followings')
+        ]
+        indexes = [
+            models.Index(fields=['following', 'follow_date'], name='activitypub_followings_date_idx')
+        ]
+
+    def __str__(self):
+        return f'{self.following} -> {self.remote_actor}'
 
 
 class NoteManager(TreeQuerySet):
@@ -470,6 +491,24 @@ def send_delete_note_to_followers(base_url, note):
             resp.raise_for_status()
         except Exception as e:
             print(str(e))
+
+
+def send_follow(local_actor, remote_actor):
+    data = {
+        "@context": "https://www.w3.org/ns/activitystreams",
+        "id": f"https://{local_actor.domain}/{uuid.uuid4()}",
+        "type": "Follow",
+        "actor": remote_actor.get_absolute_url(),
+        "object": local_actor.get_absolute_url(),
+        "to": remote_actor.get_absolute_url(),
+    }
+    resp = signed_post(
+        remote_actor.profile.get('inbox'),
+        local_actor.private_key.encode('utf-8'),
+        f'{local_actor.get_absolute_url()}#main-key',
+        body=json.dumps(data)
+    )
+    resp.raise_for_status()
 
 
 def get_object(url):

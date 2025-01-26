@@ -1,9 +1,10 @@
 from django.contrib import admin
 
-from django_activitypub.models import LocalActor, RemoteActor, Follower, Note
+from django_activitypub.models import LocalActor, RemoteActor, Follower, Following, Note
 
 
 admin.site.register(Follower)
+admin.site.register(Following)
 
 @admin.register(Note)
 class NoteAdmin(admin.ModelAdmin):

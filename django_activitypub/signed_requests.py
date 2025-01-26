@@ -1,7 +1,7 @@
 import base64
 import hashlib
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timezone
 from urllib.parse import urlparse
 from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives import hashes
@@ -11,7 +11,7 @@ import requests
 
 
 def get_gmt_now() -> str:
-    return datetime.utcnow().strftime("%a, %d %b %Y %H:%M:%S GMT")
+    return datetime.now(timezone.utc).strftime("%a, %d %b %Y %H:%M:%S GMT")
 
 
 def sign_message(private_key, message):
