@@ -1,5 +1,5 @@
 from django.urls import path
-from django_activitypub.views import webfinger, profile, followers, inbox, outbox, hostmeta, nodeinfo, nodeinfo_links, notes
+from django_activitypub.views import webfinger, profile, followers, inbox, outbox, hostmeta, nodeinfo, nodeinfo_links, notes, followings
 
 urlpatterns = [
     path('.well-known/webfinger', webfinger, name='activitypub-webfinger'),
@@ -19,6 +19,7 @@ urlpatterns = [
     path('pub/<slug:username>/statuses/<str:id>/shares', notes, \
         kwargs={'mode': 'shares'}, name='activitypub-notes-shares'),
     path('pub/<slug:username>/followers', followers, name='activitypub-followers'),
+    path('pub/<slug:username>/followings', followings, name='activitypub-followings'),
     path('pub/<slug:username>/inbox', inbox, name='activitypub-inbox'),
     path('pub/<slug:username>/outbox', outbox, name='activitypub-outbox'),
 ]

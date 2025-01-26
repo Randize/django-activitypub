@@ -181,6 +181,7 @@ def profile(request, username):
         'url': request.build_absolute_uri(reverse('activitypub-profile-short', kwargs={'username': actor.preferred_username})),
         'id': request.build_absolute_uri(reverse('activitypub-profile', kwargs={'username': actor.preferred_username})),
         'followers': request.build_absolute_uri(reverse('activitypub-followers', kwargs={'username': actor.preferred_username})),
+        # 'followings': request.build_absolute_uri(reverse('activitypub-followings', kwargs={'username': actor.preferred_username})),
         'inbox': request.build_absolute_uri(reverse('activitypub-inbox', kwargs={'username': actor.preferred_username})),
         'outbox': request.build_absolute_uri(reverse('activitypub-outbox', kwargs={'username': actor.preferred_username})),
         'publicKey': {
@@ -306,6 +307,10 @@ def followers(request, username):
         return JsonResponse(data, content_type="application/activity+json")
     else:
         return JsonResponse({'error': f'invalid page number {page_num}'}, status=404)
+
+
+def followings(request):
+    pass # TODO:
 
 
 @csrf_exempt
