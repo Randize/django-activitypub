@@ -503,6 +503,10 @@ def send_follow(local_actor, remote_actor):
     )
     resp.raise_for_status()
 
+# TODO:
+def send_unfollow(local_actor, remote_actor):
+    pass
+
 
 def get_object(url):
     resp = requests.get(url, headers={'Accept': 'application/activity+json'})
