@@ -146,8 +146,8 @@ class RemoteActor(models.Model):
     url = models.URLField(db_index=True, unique=True)
     profile = models.JSONField(blank=True, default=dict)
     followings = models.ManyToManyField(
-        LocalActor, through='Follower', related_name='following',
-        through_fields=('remote_actor', 'remoteactor_followings'),
+        LocalActor, through='Follower', related_name='remoteactor_followings',
+        through_fields=('remote_actor', 'following'),
     )
 
     objects = RemoteActorManager()
