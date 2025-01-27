@@ -411,10 +411,7 @@ def send_create_note_to_followers(base_url, note):
     data.update(note.as_json(base_url, mode='activity'))
 
     for follower in followers:
-        try:
-            inbox = follower.profile.get('endpoints')['sharedInbox']
-        except:
-            inbox = follower.profile.get('inbox')
+        inbox = follower.profile.get('inbox')
         try:
             resp = signed_post(
                 inbox,
@@ -527,7 +524,7 @@ def send_unfollow(local_actor, remote_actor):
     resp.raise_for_status()
     if Following.objects.filter(following=local_actor, remote_actor=remote_actor):
         Following.objects.get(following=local_actor, remote_actor=remote_actor).delete()
-        
+
 
 def get_object(url):
     resp = requests.get(url, headers={'Accept': 'application/activity+json'})
