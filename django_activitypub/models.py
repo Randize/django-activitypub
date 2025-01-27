@@ -117,7 +117,7 @@ class RemoteActorManager(models.Manager):
             return self.create(
                 username=data.get('preferredUsername'),
                 domain=parsed.netloc,
-                url=url,
+                url=data.get('id'),
                 profile=data,
             )
 
