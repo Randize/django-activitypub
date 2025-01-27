@@ -45,11 +45,11 @@ class LocalActor(models.Model):
     icon = models.ImageField(upload_to='actor-media', null=True, blank=True)
     image = models.ImageField(upload_to='actor-media', null=True, blank=True)
     followers = models.ManyToManyField(
-        'RemoteActor', through='Follower', related_name='followers',
+        'RemoteActor', through='Follower', related_name='localactor_followers',
         through_fields=('following', 'remote_actor'),
     )
     followings = models.ManyToManyField(
-        'RemoteActor', through='Following', related_name='followings',
+        'RemoteActor', through='Following', related_name='localactor_followings',
         through_fields=('following', 'remote_actor'),
     )
 
@@ -145,9 +145,9 @@ class RemoteActor(models.Model):
     domain = models.CharField(max_length=255)
     url = models.URLField(db_index=True, unique=True)
     profile = models.JSONField(blank=True, default=dict)
-    following = models.ManyToManyField(
+    followings = models.ManyToManyField(
         LocalActor, through='Follower', related_name='following',
-        through_fields=('remote_actor', 'following'),
+        through_fields=('remote_actor', 'remoteactor_followings'),
     )
 
     objects = RemoteActorManager()
