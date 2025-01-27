@@ -444,6 +444,9 @@ def inbox(request, username):
         elif activity['type'] == 'Delete':
             response['ok'] = True  # TODO: support deletes for notes and actors
 
+        elif activity['type'] == 'Accept':
+            response['ok'] = True  # TODO: support deletes for notes and actors
+
         else:
             return JsonResponse({'error': f'unsupported activity type: {activity["type"]}'}, status=400)
 
