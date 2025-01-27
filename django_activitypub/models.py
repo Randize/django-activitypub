@@ -57,7 +57,7 @@ class LocalActor(models.Model):
 
     class Meta:
         indexes = [
-            models.Index(fields=['preferred_username', 'domain'], name='activitypub_local_actor_idx')
+            models.Index(fields=['preferred_username', 'domain'], name='ap_local_actor_idx')
         ]
 
     @property
@@ -154,7 +154,7 @@ class RemoteActor(models.Model):
 
     class Meta:
         indexes = [
-            models.Index(fields=['username', 'domain'], name='activitypub_remote_actor_idx')
+            models.Index(fields=['username', 'domain'], name='ap_remote_actor_idx')
         ]
 
     def __str__(self):
@@ -187,10 +187,10 @@ class Follower(models.Model):
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(fields=['remote_actor', 'following'], name='activitypub_unique_followers')
+            models.UniqueConstraint(fields=['remote_actor', 'following'], name='ap_unique_followers')
         ]
         indexes = [
-            models.Index(fields=['following', 'follow_date'], name='activitypub_follow_date_idx')
+            models.Index(fields=['following', 'follow_date'], name='ap_follower_date_idx')
         ]
 
     def __str__(self):
@@ -204,10 +204,10 @@ class Following(models.Model):
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(fields=['following', 'remote_actor'], name='activitypub_unique_followings')
+            models.UniqueConstraint(fields=['following', 'remote_actor'], name='ap_unique_followings')
         ]
         indexes = [
-            models.Index(fields=['following', 'follow_date'], name='activitypub_follow_date_idx')
+            models.Index(fields=['following', 'follow_date'], name='ap_following_date_idx')
         ]
 
     def __str__(self):
@@ -269,7 +269,7 @@ class Note(TreeNode):
 
     class Meta:
         indexes = [
-            models.Index(fields=['local_actor', 'published_at'], name='activitypub_notes_by_date_idx')
+            models.Index(fields=['local_actor', 'published_at'], name='ap_notes_by_date_idx')
         ]
 
     def __str__(self):
