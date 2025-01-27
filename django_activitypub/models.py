@@ -359,9 +359,9 @@ class Note(TreeNode):
         if not self.pk and not (url and note):
             url = settings.SITE_URL
             note = self
-        send_create_note_to_followers(url, note)
-        print(f'save() - {url} - {note.content}')
-        super().save(*args, **kwargs)
+        # send_create_note_to_followers(url, note)
+        # print(f'save() - {url} - {note.content}')
+        # super().save(*args, **kwargs)
 
         try:
             super().save(*args, **kwargs)  # Save the object
