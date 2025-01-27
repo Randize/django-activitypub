@@ -281,10 +281,6 @@ class Note(TreeNode):
         return self.content_url
 
     def as_json(self, base_url, mode = 'activity'):
-        if self.local_actor:
-            attributed = self.actor.get_absolute_url()
-        else:
-            attributed = self.actor.url
         if self.published_at:
             published = self.published_at
         else:
@@ -292,16 +288,14 @@ class Note(TreeNode):
         object = {
             'id': self.get_absolute_url(), # TODO: handle remote & local content_url
             'type': 'Note',
-            'url': self.content_url,
+            'url': self.content_url + f'?id={self.content_id}',
             'summary': None,
-            'inReplyTo': None,
             'published': format_datetime(published),
-            'attributedTo': attributed,
+            'attributedTo': self.actor.get_absolute_url(),
             'to': ['https://www.w3.org/ns/activitystreams#Public'],
             'cc': [f'https://{self.actor.domain}' + reverse('activitypub-followers', kwargs={'username': self.actor.preferred_username})],
             'sensitive': self.sensitive,
             'atomUri': f'https://{self.local_actor.domain}' + reverse('activitypub-notes-statuses', kwargs={'username': self.local_actor.preferred_username, 'id': self.content_id}),
-            'inReplyToAtomUri': None,
             'conversation': None,
             'content': self.content,
             'contentMap': {}, # TODO: Auto translation to other languages e.g. {"en":"<p>厚塗り好きです！人型多め。異形も描けます:blobartist:</p>"}
@@ -341,8 +335,8 @@ class Note(TreeNode):
                 'type': 'Create',
                 'actor': self.actor.account_url,
                 'published': format_datetime(published),
-                'to': 'https://www.w3.org/ns/activitystreams#Public',
-                'cc': f'https://{self.actor.domain}' + reverse('activitypub-followers', kwargs={'username': self.actor.preferred_username}),
+                'to': ['https://www.w3.org/ns/activitystreams#Public'],
+                'cc': [f'https://{self.actor.domain}' + reverse('activitypub-followers', kwargs={'username': self.actor.preferred_username})],
                 'object': object
             }
             if mode == 'update':
@@ -412,7 +406,8 @@ def send_create_note_to_followers(base_url, note):
     actor_url = actor.get_absolute_url()
     followers = actor.followers.all()
     data = {'@context' : [
-        'https://www.w3.org/ns/activitystreams'
+        'https://www.w3.org/ns/activitystreams',
+        "https://w3id.org/security/v1"
     ]}
     data.update(note.as_json(base_url, mode='activity'))
 
