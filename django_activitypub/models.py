@@ -190,7 +190,7 @@ class Follower(models.Model):
             models.UniqueConstraint(fields=['remote_actor', 'following'], name='activitypub_unique_followers')
         ]
         indexes = [
-            models.Index(fields=['following', 'follow_date'], name='activitypub_followers_date_idx')
+            models.Index(fields=['following', 'follow_date'], name='activitypub_follow_date_idx')
         ]
 
     def __str__(self):
@@ -207,7 +207,7 @@ class Following(models.Model):
             models.UniqueConstraint(fields=['following', 'remote_actor'], name='activitypub_unique_followings')
         ]
         indexes = [
-            models.Index(fields=['following', 'follow_date'], name='activitypub_followings_date_idx')
+            models.Index(fields=['following', 'follow_date'], name='activitypub_follow_date_idx')
         ]
 
     def __str__(self):
