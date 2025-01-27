@@ -490,7 +490,7 @@ def send_delete_note_to_followers(base_url, note):
 def send_follow(local_actor, remote_actor):
     data = {
         "@context": "https://www.w3.org/ns/activitystreams",
-        "id": f"https://{local_actor.domain}/{uuid.uuid4()}",
+        "id": f"https://{local_actor.domain}/{uuid.uuid4()}", 
         "type": "Follow",
         "actor": local_actor.get_absolute_url(),
         "object": remote_actor.get_absolute_url(),
@@ -502,11 +502,32 @@ def send_follow(local_actor, remote_actor):
         body=json.dumps(data)
     )
     resp.raise_for_status()
+    Following.objects.get_or_create(remote_actor=remote_actor, following=local_actor)
 
-# TODO:
+
 def send_unfollow(local_actor, remote_actor):
-    pass
-
+    data = {
+        "@context": "https://www.w3.org/ns/activitystreams",
+        "id": f"https://{local_actor.domain}/{uuid.uuid4()}",
+        "type": "Undo",
+        "actor": local_actor.get_absolute_url(),
+        "object": {
+            "id": "https://activitypub.academy/b6459eb4-97d9-4e61-9a26-8a777ba1d2e0",
+            "type": "Follow",
+            "actor": local_actor.get_absolute_url(),
+            "object": remote_actor.get_absolute_url()
+        }
+    }
+    resp = signed_post(
+        remote_actor.profile.get('inbox'),
+        local_actor.private_key.encode('utf-8'),
+        f'{local_actor.get_absolute_url()}#main-key',
+        body=json.dumps(data)
+    )
+    resp.raise_for_status()
+    if Following.objects.filter(following=local_actor, remote_actor=remote_actor):
+        Following.objects.get(following=local_actor, remote_actor=remote_actor).delete()
+        
 
 def get_object(url):
     resp = requests.get(url, headers={'Accept': 'application/activity+json'})
