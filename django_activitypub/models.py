@@ -109,10 +109,9 @@ class RemoteActorManager(models.Manager):
         try:
             return self.get(url=url)  # TODO: check cache expiry
         except RemoteActor.DoesNotExist:
-            if actor:
-                data = fetch_remote_profile(url, actor)
-            else:
-                data = fetch_remote_profile(url, actor)
+            data = fetch_remote_profile(url, actor)
+            if self.filter(url=data['id']):
+                return self.get(url=data['id'])
             parsed = urllib.parse.urlparse(url)
             return self.create(
                 username=data.get('preferredUsername'),
@@ -493,9 +492,8 @@ def send_follow(local_actor, remote_actor):
         "@context": "https://www.w3.org/ns/activitystreams",
         "id": f"https://{local_actor.domain}/{uuid.uuid4()}",
         "type": "Follow",
-        "actor": remote_actor.get_absolute_url(),
-        "object": local_actor.get_absolute_url(),
-        "to": remote_actor.get_absolute_url(),
+        "actor": local_actor.get_absolute_url(),
+        "object": remote_actor.get_absolute_url(),
     }
     resp = signed_post(
         remote_actor.profile.get('inbox'),
