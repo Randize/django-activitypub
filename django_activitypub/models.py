@@ -183,7 +183,7 @@ class RemoteActor(models.Model):
 class Follower(models.Model):
     remote_actor = models.ForeignKey(RemoteActor, on_delete=models.CASCADE)
     following = models.ForeignKey(LocalActor, on_delete=models.CASCADE)
-    follow_date = models.DateTimeField(auto_now=True)
+    follow_date = models.DateTimeField(auto_now=True, db_index=True)
 
     class Meta:
         constraints = [
@@ -200,7 +200,7 @@ class Follower(models.Model):
 class Following(models.Model):
     remote_actor = models.ForeignKey(RemoteActor, on_delete=models.CASCADE)
     following = models.ForeignKey(LocalActor, on_delete=models.CASCADE)
-    follow_date = models.DateTimeField(auto_now=True)
+    follow_date = models.DateTimeField(auto_now=True, db_index=True)
 
     class Meta:
         constraints = [
