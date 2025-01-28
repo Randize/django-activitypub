@@ -324,7 +324,7 @@ class Note(TreeNode):
         }
         if self.images:
             for image in self.images:
-                with Image.open(self.image) as img:
+                with Image.open(image) as img:
                     object['attachment'] += [{
                         "type": "Image",
                         "mediaType": Image.MIME[img.format],
