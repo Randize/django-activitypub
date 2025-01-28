@@ -427,6 +427,7 @@ def send_update_note_to_followers(note):
             "https://w3id.org/security/v1"
         ],
     }
+    data.update(note.as_json(mode='update'))
 
     for follower in note.local_actor.followers.all():
         inbox = follower.profile.get('inbox')
