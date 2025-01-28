@@ -222,9 +222,9 @@ def notes(request, username, id, mode = 'statuses'):
     except:
         return JsonResponse({'error': 'Not Found'}, status=404)
     if mode == 'statuses':
-        data = note.as_json(request.build_absolute_uri, mode='statuses')
+        data = note.as_json(mode='statuses')
     elif mode == 'activity':
-        data = note.as_json(request.build_absolute_uri, mode='activity')
+        data = note.as_json(mode='activity')
     elif mode == 'likes':
         data = {
             "@context": "https://www.w3.org/ns/activitystreams",
@@ -486,7 +486,7 @@ def outbox(request, username):
             data['next'] = outbox_url + f'?page={page.next_page_number()}'
         data['id'] = outbox_url + f'?page={page_num}'
         data['type'] = 'OrderedCollectionPage'
-        data['orderedItems'] = [note.as_json(base_url, mode='activity') for note in page.object_list]
+        data['orderedItems'] = [note.as_json(mode='activity') for note in page.object_list]
         data['partOf'] = outbox_url
         return JsonResponse(data, content_type="application/activity+json")
     else:

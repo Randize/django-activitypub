@@ -8,6 +8,8 @@ from django.contrib.auth import get_user_model
 from django.db import models
 from django.utils import timezone
 from django.conf import settings
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives import serialization
 from tree_queries.models import TreeNode, TreeQuerySet
@@ -279,7 +281,7 @@ class Note(TreeNode):
             return f'https://{self.local_actor.domain}' + reverse('activitypub-notes-statuses', kwargs={'username': self.local_actor.preferred_username, 'id': self.content_id})
         return self.content_url
 
-    def as_json(self, base_url, mode = 'activity'):
+    def as_json(self, mode = 'activity'):
         if self.published_at:
             published = self.published_at
         else:
@@ -299,7 +301,7 @@ class Note(TreeNode):
             'content': self.content, # TODO: parse any links and hastag to hyperlinks
             'contentMap': {}, # TODO: Auto translation to other languages e.g. {"en":"<p>厚塗り好きです！人型多め。異形も描けます:blobartist:</p>"}
             'attachment': [],
-            'tag': list(parse_mentions(self.content)) + list(parse_hashtags(self.content, base_url)),
+            'tag': [],
             'replies': {}, 
             'likes': {
                 'id': f'https://{self.actor.domain}' + reverse('activitypub-notes-likes', kwargs={'username': self.actor.preferred_username, 'id': self.content_id}),
@@ -351,25 +353,13 @@ class Note(TreeNode):
     @property
     def max_depth(self):
         return min(getattr(self, 'tree_depth', 1), 5)
-
-    def save(self, *args, **kwargs):
-        try:
-            super().save(*args, **kwargs)  # Save the object
-            url = kwargs.pop('url', None)
-            note = kwargs.pop('note', None)
-            if not (url and note):
-                url = settings.SITE_URL
-                note = self
-            send_create_note_to_followers(url, note)
-            print(f'save() - {url} - {note.content}')
-        except Exception as e:
-            print(f"save() error: {e}")
     
-def parse_hashtags(content, base_url):
+    
+def parse_hashtags(content, domain):
     for t in re.findall(r'#\w+', content):
         yield {
             'type': 'Hashtag',
-            'href': f'https://{base_url}/tags/{t}',
+            'href': f'https://{domain}/tags/{t}',
             'name': t,
         }
     
@@ -392,7 +382,7 @@ def parse_mentions(content):
         }
 
 
-def send_create_note_to_followers(base_url, note):
+def send_create_note_to_followers(note):
     if note.local_actor:
         actor = note.local_actor
     elif note.parent and note.parent.local_actor:
@@ -403,10 +393,12 @@ def send_create_note_to_followers(base_url, note):
         'https://www.w3.org/ns/activitystreams',
         "https://w3id.org/security/v1"
     ]}
-    data.update(note.as_json(base_url, mode='activity'))
+    data.update(note.as_json(mode='activity'))
 
     for follower in followers:
         inbox = follower.profile.get('inbox')
+        domain = follower.domain
+        data['object']['tag'] = list(parse_mentions(note.content)) + list(parse_hashtags(note.content, domain))
         try:
             resp = signed_post(
                 inbox,
@@ -422,29 +414,33 @@ def send_create_note_to_followers(base_url, note):
             #     follower.delete()
             print(str(e))
 
-def send_update_note_to_followers(base_url, note):
+def send_update_note_to_followers(note):
     if note.local_actor:
-        actor_url = note.local_actor.get_absolute_url()
-    else:
-        actor_url = note.remote_actor.url
-    update_msg = {
+        actor = note.local_actor
+    elif note.parent and note.parent.local_actor:
+        actor = note.parent.local_actor
+    actor_url = actor.get_absolute_url()
+    data = {
         '@context': [
             'https://www.w3.org/ns/activitystreams',
         ],
         'type': 'Update',
         'id': f'{note.content_url}#updates/{note.updated_at.timestamp()}',
         'actor': actor_url,
-        'object': note.as_json(base_url, mode='update'),
+        'object': note.as_json(mode='update'),
         'published': format_datetime(note.published_at),
     }
 
     for follower in note.local_actor.followers.all():
+        inbox = follower.profile.get('inbox')
+        domain = follower.domain
+        data['object']['tag'] = list(parse_mentions(note.content)) + list(parse_hashtags(note.content, domain))
         try:
             resp = signed_post(
-                follower.profile.get('inbox'),
+                inbox,
                 note.local_actor.private_key.encode('utf-8'),
                 f'{actor_url}#main-key',
-                body=json.dumps(update_msg)
+                body=json.dumps(data)
             )
             resp.raise_for_status()
             print(f'send_update_note_to_followers - {follower.__str__()}')
@@ -531,3 +527,12 @@ def get_with_url(url):
     parsed = urllib.parse.urlparse(url)
     match = resolve(parsed.path)
     return Note.objects.get(content_id=match.kwargs['id'])
+
+
+@receiver(post_save, sender=Note)
+def note_dispatch(sender, instance, created, **kwargs):
+    note = instance
+    if created:
+        send_create_note_to_followers(note)
+    else:
+        send_update_note_to_followers(note)
