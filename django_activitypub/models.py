@@ -353,19 +353,14 @@ class Note(TreeNode):
         return min(getattr(self, 'tree_depth', 1), 5)
 
     def save(self, *args, **kwargs):
-        url = kwargs.pop('url', None)
-        note = kwargs.pop('note', None)
-        if not self.pk and not (url and note):
-            url = settings.SITE_URL
-            note = self
-        # send_create_note_to_followers(url, note)
-        # print(f'save() - {url} - {note.content}')
-        # super().save(*args, **kwargs)
-
         try:
             super().save(*args, **kwargs)  # Save the object
-            if self.pk:  # Only send the note if the object is successfully created
-                send_create_note_to_followers(url, note)
+            url = kwargs.pop('url', None)
+            note = kwargs.pop('note', None)
+            if not (url and note):
+                url = settings.SITE_URL
+                note = self
+            send_create_note_to_followers(url, note)
             print(f'save() - {url} - {note.content}')
         except Exception as e:
             print(f"save() error: {e}")
