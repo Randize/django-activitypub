@@ -501,6 +501,11 @@ def send_delete_note_to_followers(note):
                 f'{actor_url}#main-key',
                 body=json.dumps(delete_msg)
             )
+            try:
+                if 'error' in resp.json() and resp.json()['error'] == 'Record not found':
+                    follower.delete()
+            except Exception as e:
+                print(str(e))
             resp.raise_for_status()
         except Exception as e:
             print(str(e))
@@ -508,8 +513,9 @@ def send_delete_note_to_followers(note):
 
 def delete_all_notes():
     for note in Note.objects.all():
-        if not note.parent and note.local_remote:
+        if not note.parent and note.local_actor:
             send_delete_note_to_followers(note)
+            # note.delete()
 
 
 def send_old_notes(local_actor, remote_actor): 
