@@ -341,8 +341,11 @@ class Note(TreeNode):
                 'object': object
             }
             if mode == 'update':
-                data['type'] = 'Update'
-                data['updated'] = format_datetime(self.updated_at)
+                data.update(
+                    'id': f'https://{self.actor.domain}' + reverse('activitypub-notes-activity', kwargs={'username': self.actor.preferred_username, 'id': self.content_id}) + f'?update={str(uuid.uuid4().int)[:10]}',
+                    'type': 'Update',
+                    'updated': format_datetime(self.updated_at)
+                )
         elif mode == 'statuses':
             data = object
         return data
