@@ -506,6 +506,12 @@ def send_delete_note_to_followers(note):
             print(str(e))
 
 
+def delete_all_notes():
+    for note in Note.objects.all():
+        if not note.parent:
+            send_delete_note_to_followers(note)
+
+
 def send_old_notes(local_actor, remote_actor): 
     # TODO: get all public notes and then send to the actor, check if domain exists > check on get or create level
     actor = local_actor
