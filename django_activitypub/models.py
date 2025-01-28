@@ -477,7 +477,7 @@ def send_update_note_to_followers(note):
 
 def send_delete_note_to_followers(note):
     actor_url = note.actor.get_absolute_url()
-    delete_msg = {
+    data = {
         '@context': [
             'https://www.w3.org/ns/activitystreams',
         ],
@@ -500,7 +500,7 @@ def send_delete_note_to_followers(note):
                 follower.profile.get('inbox'),
                 note.local_actor.private_key.encode('utf-8'),
                 f'{actor_url}#main-key',
-                body=json.dumps(delete_msg)
+                body=json.dumps(data)
             )
             if resp.status_code == 404:
                 try:
