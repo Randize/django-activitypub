@@ -10,6 +10,9 @@ from django.utils import timezone
 from django.conf import settings
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.utils.html import escape
+from django.utils.safestring import mark_safe
+
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives import serialization
 from tree_queries.models import TreeNode, TreeQuerySet
@@ -280,6 +283,21 @@ class Note(TreeNode):
         if self.local_actor:
             return f'https://{self.local_actor.domain}' + reverse('activitypub-notes-statuses', kwargs={'username': self.local_actor.preferred_username, 'id': self.content_id})
         return self.content_url
+    
+    def content_html(self):
+        if not self.content:
+            return ''
+        content = escape(self.content)
+        url_pattern = re.compile(r'(https?://[^\s]+)')
+        content = url_pattern.sub(r'<a href="\1" target="_blank" rel="nofollow noopener" class="status-link unhandled-link">\1</a>', content)
+
+        hashtag_pattern = re.compile(r'#(\w+)')
+        content = hashtag_pattern.sub(r'<a href="/hashtags/\1" class="mention hashtag status-link" rel="tag">#\1</a>', content)
+
+        paragraphs = content.split('\n')
+        formatted_text = ''.join(f'<p>{para.strip()}</p>' for para in paragraphs if para.strip())
+
+        return mark_safe(formatted_text)
 
     def as_json(self, mode = 'activity'):
         if self.published_at:
@@ -476,6 +494,39 @@ def send_delete_note_to_followers(base_url, note):
             resp.raise_for_status()
         except Exception as e:
             print(str(e))
+
+
+def send_old_notes(local_actor, remote_actor): 
+    # TODO: get all public notes and then send to the actor, check if domain exists > check on get or create level
+    actor = local_actor
+    actor_url = local_actor.get_absolute_url()
+    domain = remote_actor.domain
+    inbox = remote_actor.profile.get('inbox')
+    data = {
+        '@context': [
+            'https://www.w3.org/ns/activitystreams',
+            "https://w3id.org/security/v1"
+        ],
+    }
+    notes = Note.objects.order_by('-published_at').filter(local_actor=local_actor)
+    for note in notes:
+        data.update(note.as_json(mode='update'))
+        data['object']['tag'] = list(parse_mentions(note.content)) + list(parse_hashtags(note.content, domain))
+        try:
+            resp = signed_post(
+                inbox,
+                actor.private_key.encode('utf-8'),
+                f'{actor_url}#main-key',
+                body=json.dumps(data)
+            )
+            resp.raise_for_status()
+            print(f'send_old_notes - {remote_actor.__str__()} - {resp.status_code}')
+        except Exception as e: 
+            # TODO: gracefully handle deleted followers so replies stay
+            # if re.findall(r'Not Found', str(e)):
+            #     follower.delete()
+            print(str(e))
+
 
 
 def send_follow(local_actor, remote_actor):
