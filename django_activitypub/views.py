@@ -466,7 +466,7 @@ def outbox(request, username):
     except LocalActor.DoesNotExist:
         return JsonResponse({}, status=404)
 
-    query = Note.objects.order_by('-published_at').filter(local_actor=actor)
+    query = Note.objects.order_by('-published_at').filter(local_actor=actor, tombstone=False)
 
     paginator = Paginator(query, 10)
     page_num_arg = request.GET.get('page', None)
