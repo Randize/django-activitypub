@@ -503,7 +503,7 @@ def send_delete_note_to_followers(note):
             )
             if resp.status_code == 404:
                 try:
-                    if 'error' in resp.json() and resp.json()['error'] == 'Record not found':
+                    if 'error' in resp.json():
                         follower.delete()
                         print(f'{follower.__str__()} deleted')
                 except Exception as e:
