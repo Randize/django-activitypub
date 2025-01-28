@@ -300,7 +300,7 @@ class Note(TreeNode):
             'conversation': None,
             'content': self.content, # TODO: parse any links and hastag to hyperlinks
             'contentMap': {}, # TODO: Auto translation to other languages e.g. {"en":"<p>厚塗り好きです！人型多め。異形も描けます:blobartist:</p>"}
-            'attachment': [],
+            'attachment': [], # TODO: Image attachment
             'tag': [],
             'replies': {}, 
             'likes': {
