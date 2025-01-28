@@ -268,6 +268,7 @@ class Note(TreeNode):
     likes = models.ManyToManyField(RemoteActor, blank=True, related_name='likes')
     announces = models.ManyToManyField(RemoteActor, blank=True, related_name='announces')
     sensitive = models.BooleanField(default=False)
+    tombstone = models.BooleanField(default=False)
 
     objects = NoteManager.as_manager()
 
@@ -515,9 +516,10 @@ def send_delete_note_to_followers(note):
 
 def delete_all_notes():
     for note in Note.objects.all():
-        if not note.parent and note.local_actor:
+        if not note.parent and note.local_actor and not note.tombstone:
             send_delete_note_to_followers(note)
-            # note.delete()
+            note.tombstone = True
+            note.save()
 
 
 def send_old_notes(local_actor, remote_actor): 
