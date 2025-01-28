@@ -239,6 +239,8 @@ def notes(request, username, id, mode = 'statuses'):
             'type': 'Collection',
             'totalItems': note.announces.count()
         }
+    elif mode == 'delete':
+        data = {}
     elif mode == 'replies':
         query = note.children.order_by('-published_at')
         paginator = Paginator(query, 10)

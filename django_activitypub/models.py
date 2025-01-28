@@ -474,17 +474,22 @@ def send_update_note_to_followers(note):
             print(str(e))
 
 
-def send_delete_note_to_followers(base_url, note):
+def send_delete_note_to_followers(note):
     actor_url = note.local_actor.get_absolute_url()
     delete_msg = {
         '@context': [
             'https://www.w3.org/ns/activitystreams',
         ],
+        'id': f'https://{note.actor.domain}' + reverse('activitypub-notes-delete', kwargs={'username': note.actor.preferred_username, 'id': note.content_id}),
         'type': 'Delete',
         'actor': actor_url,
+        "to": [
+            "https://www.w3.org/ns/activitystreams#Public"
+        ],
         'object': {
-            'id': note.content_url,
+            'id': note.get_absolute_url(),
             'type': 'Tombstone',
+            'atomUri': note.get_absolute_url()
         },
     }
 
@@ -531,7 +536,6 @@ def send_old_notes(local_actor, remote_actor):
             # if re.findall(r'Not Found', str(e)):
             #     follower.delete()
             print(str(e))
-
 
 
 def send_follow(local_actor, remote_actor):

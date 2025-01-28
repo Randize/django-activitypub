@@ -18,6 +18,8 @@ urlpatterns = [
         kwargs={'mode': 'likes'}, name='activitypub-notes-likes'),
     path('pub/<slug:username>/statuses/<str:id>/shares', notes, \
         kwargs={'mode': 'shares'}, name='activitypub-notes-shares'),
+    path('pub/<slug:username>/statuses/<str:id>/delete', notes, \
+        kwargs={'mode': 'delete'}, name='activitypub-notes-delete'),
     path('pub/<slug:username>/followers', followers, name='activitypub-followers'),
     path('pub/<slug:username>/followings', followings, name='activitypub-followings'),
     path('pub/<slug:username>/inbox', inbox, name='activitypub-inbox'),
