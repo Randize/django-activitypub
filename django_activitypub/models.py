@@ -501,14 +501,16 @@ def send_delete_note_to_followers(note):
                 f'{actor_url}#main-key',
                 body=json.dumps(delete_msg)
             )
-            try:
-                if 'error' in resp.json() and resp.json()['error'] == 'Record not found':
-                    follower.delete()
-            except Exception as e:
-                print(str(e))
+            if resp.status_code == 404:
+                try:
+                    if 'error' in resp.json() and resp.json()['error'] == 'Record not found':
+                        follower.delete()
+                        print(f'{follower.__str__()} deleted')
+                except Exception as e:
+                    print(f'resp.json - {str(e)}')
             resp.raise_for_status()
         except Exception as e:
-            print(str(e))
+            print(f'signed_post - {str(e)}')
 
 
 def delete_all_notes():
