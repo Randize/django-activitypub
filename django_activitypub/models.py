@@ -512,14 +512,15 @@ def send_delete_note_to_followers(note):
             resp.raise_for_status()
         except Exception as e:
             print(f'signed_post - {str(e)}')
+        print(f'{note.__str__()} tombstoned')
+        note.tombstone = True
+        note.save()
 
 
 def delete_all_notes():
     for note in Note.objects.all():
         if not note.parent and note.local_actor and not note.tombstone:
             send_delete_note_to_followers(note)
-            note.tombstone = True
-            note.save()
 
 
 def send_old_notes(local_actor, remote_actor): 
