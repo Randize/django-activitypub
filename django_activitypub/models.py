@@ -296,7 +296,7 @@ class Note(TreeNode):
             'sensitive': self.sensitive,
             'atomUri': f'https://{self.local_actor.domain}' + reverse('activitypub-notes-statuses', kwargs={'username': self.local_actor.preferred_username, 'id': self.content_id}),
             'conversation': None,
-            'content': self.content,
+            'content': self.content, # TODO: parse any links and hastag to hyperlinks
             'contentMap': {}, # TODO: Auto translation to other languages e.g. {"en":"<p>厚塗り好きです！人型多め。異形も描けます:blobartist:</p>"}
             'attachment': [],
             'tag': list(parse_mentions(self.content)) + list(parse_hashtags(self.content, base_url)),
