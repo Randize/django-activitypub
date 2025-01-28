@@ -475,7 +475,7 @@ def send_update_note_to_followers(note):
 
 
 def send_delete_note_to_followers(note):
-    actor_url = note.local_actor.get_absolute_url()
+    actor_url = note.actor.get_absolute_url()
     delete_msg = {
         '@context': [
             'https://www.w3.org/ns/activitystreams',
@@ -508,7 +508,7 @@ def send_delete_note_to_followers(note):
 
 def delete_all_notes():
     for note in Note.objects.all():
-        if not note.parent:
+        if not note.parent and note.local_parent:
             send_delete_note_to_followers(note)
 
 
