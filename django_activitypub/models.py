@@ -341,6 +341,7 @@ class Note(TreeNode):
                 'object': object
             }
             if mode == 'update':
+                data['type'] = 'Update'
                 data['updated'] = format_datetime(self.updated_at)
         elif mode == 'statuses':
             data = object
@@ -423,12 +424,8 @@ def send_update_note_to_followers(note):
     data = {
         '@context': [
             'https://www.w3.org/ns/activitystreams',
+            "https://w3id.org/security/v1"
         ],
-        'type': 'Update',
-        'id': f'{note.content_url}#updates/{note.updated_at.timestamp()}',
-        'actor': actor_url,
-        'object': note.as_json(mode='update'),
-        'published': format_datetime(note.published_at),
     }
 
     for follower in note.local_actor.followers.all():
