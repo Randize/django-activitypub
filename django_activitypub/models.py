@@ -611,7 +611,8 @@ def get_with_url(url):
 @receiver(post_save, sender=Note)
 def note_dispatch(sender, instance, created, **kwargs):
     note = instance
-    if created:
-        send_create_note_to_followers(note)
-    else:
-        send_update_note_to_followers(note)
+    if not note.tombstone:
+        if created:
+            send_create_note_to_followers(note)
+        else:
+            send_update_note_to_followers(note)
