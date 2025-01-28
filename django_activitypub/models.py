@@ -508,7 +508,7 @@ def send_delete_note_to_followers(note):
 
 def delete_all_notes():
     for note in Note.objects.all():
-        if not note.parent and note.local_parent:
+        if not note.parent and note.local_remote:
             send_delete_note_to_followers(note)
 
 
