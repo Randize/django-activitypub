@@ -311,8 +311,40 @@ def followers(request, username):
         return JsonResponse({'error': f'invalid page number {page_num}'}, status=404)
 
 
-def followings(request):
-    pass # TODO:
+def followings(request, username):
+    try:
+        actor = LocalActor.objects.get(preferred_username=username)
+    except LocalActor.DoesNotExist:
+        return JsonResponse({}, status=404)
+
+    query = Following.objects.order_by('-follow_date').select_related('remote_actor').filter(following=actor)
+    paginator = Paginator(query, 10)
+    page_num_arg = request.GET.get('page', None)
+    followers_url = request.build_absolute_uri(reverse('activitypub-followings', kwargs={'username': actor.preferred_username}))
+    data = {
+        '@context': 'https://www.w3.org/ns/activitystreams',
+        'type': 'OrderedCollection',
+        'totalItems': paginator.count,
+        'id': followers_url,
+    }
+
+    if page_num_arg is None:
+        data['first'] = followers_url + '?page=1'
+        return JsonResponse(data, content_type="application/activity+json")
+
+    page_num = int(page_num_arg)
+
+    if 1 <= page_num <= paginator.num_pages:
+        page = paginator.page(page_num)
+        if page.has_next():
+            data['next'] = followers_url + f'?page={page.next_page_number()}'
+        data['id'] = followers_url + f'?page={page_num}'
+        data['type'] = 'OrderedCollectionPage'
+        data['orderedItems'] = [follower.remote_actor.url for follower in page.object_list]
+        data['partOf'] = followers_url
+        return JsonResponse(data, content_type="application/activity+json")
+    else:
+        return JsonResponse({'error': f'invalid page number {page_num}'}, status=404)
 
 
 @csrf_exempt
