@@ -398,7 +398,11 @@ def parse_html(content):
     if not content:
         return ''
     content = escape(content)
-    url_pattern = re.compile(r'(https?://[^\s]+)')
+    url_pattern = re.compile(
+                    r'<a href="\1\2" target="_blank" rel="noopener noreferrer">'
+                    r'<span class="invisible">\1</span>\2</a>',
+                    content
+                )
     content = url_pattern.sub(r'<a href="\1" target="_blank" rel="nofollow noopener" class="status-link unhandled-link">\1</a>', content)
 
     hashtag_pattern = re.compile(r'#(\w+)')
