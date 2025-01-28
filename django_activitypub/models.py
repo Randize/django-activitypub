@@ -17,6 +17,7 @@ from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives import serialization
 from tree_queries.models import TreeNode, TreeQuerySet
 from datetime import datetime
+from PIL import Image
 
 from django_activitypub.signed_requests import signed_post
 from django_activitypub.utils.dates import format_datetime, parse_datetime
@@ -321,6 +322,19 @@ class Note(TreeNode):
                 'totalItems': self.announces.count()
             },
         }
+        if self.images:
+            for image in self.images:
+                with Image.open(self.image) as img:
+                    object['attachment'] += [{
+                        "type": "Image",
+                        "mediaType": Image.MIME[img.format],
+                        "url": image.url,
+                        "name": image.caption,
+                        # "blurhash": "UuNw+oS3_NkCR:ayM|oMyDoLIBj[t7ofaLay",
+                        "focalPoint": [0.5, 0.5],
+                        "width": img.size[0],
+                        "height": img.size[1]
+                    }]
         if self.children:
             replies_url = f'https://{self.actor.domain}' + reverse('activitypub-notes-replies', kwargs={'username': self.actor.preferred_username, 'id': self.content_id})
             object['replies'] = {
