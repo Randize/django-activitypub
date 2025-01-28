@@ -285,19 +285,7 @@ class Note(TreeNode):
         return self.content_url
     
     def content_html(self):
-        if not self.content:
-            return ''
-        content = escape(self.content)
-        url_pattern = re.compile(r'(https?://[^\s]+)')
-        content = url_pattern.sub(r'<a href="\1" target="_blank" rel="nofollow noopener" class="status-link unhandled-link">\1</a>', content)
-
-        hashtag_pattern = re.compile(r'#(\w+)')
-        content = hashtag_pattern.sub(r'<a href="/hashtags/\1" class="mention hashtag status-link" rel="tag">#\1</a>', content)
-
-        paragraphs = content.split('\n')
-        formatted_text = ''.join(f'<p>{para.strip()}</p>' for para in paragraphs if para.strip())
-
-        return mark_safe(formatted_text)
+        return parse_html(self.content)
 
     def as_json(self, mode = 'activity'):
         if self.published_at:
@@ -404,6 +392,22 @@ def parse_mentions(content):
             'href': actor.url,
             'name': f'{key[0]}@{key[1]}',
         }
+
+
+def parse_html(content):
+    if not content:
+        return ''
+    content = escape(content)
+    url_pattern = re.compile(r'(https?://[^\s]+)')
+    content = url_pattern.sub(r'<a href="\1" target="_blank" rel="nofollow noopener" class="status-link unhandled-link">\1</a>', content)
+
+    hashtag_pattern = re.compile(r'#(\w+)')
+    content = hashtag_pattern.sub(r'<a href="/hashtags/\1" class="mention hashtag status-link" rel="tag">#\1</a>', content)
+
+    paragraphs = content.split('\n')
+    formatted_text = ''.join(f'<p>{para.strip()}</p>' for para in paragraphs if para.strip())
+
+    return mark_safe(formatted_text)
 
 
 def send_create_note_to_followers(note):
