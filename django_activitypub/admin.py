@@ -1,7 +1,10 @@
 from django.contrib import admin
 
-from django_activitypub.models import LocalActor, RemoteActor, Follower, Following, Note
+from django_activitypub.models import LocalActor, RemoteActor, Follower, Following, Note, ImageAttachment
 
+class ImageAttachmentInline(admin.TabularInline):
+    model = ImageAttachment
+    extra = 1 
 
 admin.site.register(Follower)
 admin.site.register(Following)
@@ -9,6 +12,7 @@ admin.site.register(Following)
 @admin.register(Note)
 class NoteAdmin(admin.ModelAdmin):
     list_display = ('__str__', 'id', 'tombstone', 'updated_at')
+    inlines = [ImageAttachmentInline]
     
 @admin.register(LocalActor)
 class LocalActorAdmin(admin.ModelAdmin):

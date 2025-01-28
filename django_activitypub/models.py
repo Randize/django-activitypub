@@ -367,6 +367,16 @@ class Note(TreeNode):
     def max_depth(self):
         return min(getattr(self, 'tree_depth', 1), 5)
     
+
+class ImageAttachment(models.Model):
+    note = models.ForeignKey(Note, on_delete=models.CASCADE, related_name='images')
+    image = models.ImageField(upload_to='attachment', blank=True, null=True)
+    caption = models.TextField(blank=True, null=True)
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+            return {self.note.__str__()}
+
     
 def parse_hashtags(content, domain):
     for t in re.findall(r'#\w+', content):
