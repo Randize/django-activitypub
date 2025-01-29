@@ -460,23 +460,26 @@ def send_create_note_to_followers(note):
     data.update(note.as_json(mode='activity'))
 
     for follower in followers:
-        inbox = follower.profile.get('inbox')
-        domain = follower.domain
-        data['object']['tag'] = list(parse_mentions(note.content)) + list(parse_hashtags(note.content, domain))
-        try:
-            resp = signed_post(
-                inbox,
-                actor.private_key.encode('utf-8'),
-                f'{actor_url}#main-key',
-                body=json.dumps(data)
-            )
-            resp.raise_for_status()
-            print(f'send_create_note_to_followers - {follower.__str__()} - {resp.status_code}')
-        except Exception as e: 
-            # TODO: gracefully handle deleted followers so replies stay
-            # if re.findall(r'Not Found', str(e)):
-            #     follower.delete()
-            print(str(e))
+        if follower not in note.outbox.all():
+            inbox = follower.profile.get('inbox')
+            domain = follower.domain
+            data['object']['tag'] = list(parse_mentions(note.content)) + list(parse_hashtags(note.content, domain))
+            try:
+                resp = signed_post(
+                    inbox,
+                    actor.private_key.encode('utf-8'),
+                    f'{actor_url}#main-key',
+                    body=json.dumps(data)
+                )
+                resp.raise_for_status()
+                note.outbox.add(follower)
+
+                print(f'send_create_note_to_followers - {follower.__str__()} - {resp.status_code}')
+            except Exception as e: 
+                # TODO: gracefully handle deleted followers so replies stay
+                # if re.findall(r'Not Found', str(e)):
+                #     follower.delete()
+                print(f'send_create_note_to_followers - error - {e}')
 
 def send_update_note_to_followers(note):
     if note.local_actor:
@@ -655,15 +658,11 @@ def note_dispatch(sender, instance, created, **kwargs):
 def imageAttachment_note_add(sender, instance, created, **kwargs):
     if instance.note:  
         instance.note.attachments.add(instance) 
-        instance.note.save() 
-
 
 @receiver(post_delete, sender=ImageAttachment)
 def imageAttachment_note_del(sender, instance, **kwargs):
     if instance.note: 
         instance.note.attachments.remove(instance) 
-        instance.note.save()
-
 
 @receiver(m2m_changed, sender=Note.attachments.through)
 def imageAttachment_note(sender, instance, action, reverse, pk_set, **kwargs):
