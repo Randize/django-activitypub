@@ -662,9 +662,6 @@ def note_dispatch(sender, instance, created, **kwargs):
 @receiver(post_save, sender=ImageAttachment)
 def imageAttachment_note_add(sender, instance, created, **kwargs):
     if instance.note:  
-        if instance.note.attachments.filter(attachment='').exists():
-            instance.note.attachments.get(attachment='').delete()
-
         instance.note.attachments.add(instance) 
         instance.note.save() 
 
@@ -680,6 +677,8 @@ def imageAttachment_note_del(sender, instance, **kwargs):
 def imageAttachment_note(sender, instance, action, reverse, pk_set, **kwargs):
     if action == "post_add":
         print(f"Attachments {pk_set} added to Note {instance.id}")
+        if instance.note.attachments.filter(attachment='').exists():
+            instance.note.attachments.get(attachment='').delete()
     elif action == "post_remove":
         print(f"Attachments {pk_set} removed from Note {instance.id}")
     elif action == "post_clear":
