@@ -275,7 +275,7 @@ class Note(TreeNode):
     content_id = models.CharField(max_length=18, unique=True, default=content_id_generator, editable=False)
     likes = models.ManyToManyField(RemoteActor, blank=True, related_name='likes')
     announces = models.ManyToManyField(RemoteActor, blank=True, related_name='announces')
-    outbox = models.ManyToManyField('RemoteActor', blank=True, related_name='outbox')
+    outbox = models.ManyToManyField('RemoteActor', through='Follower', blank=True, related_name='outbox')
     sensitive = models.BooleanField(default=False)
     tombstone = models.BooleanField(default=False)
     ready = models.BooleanField(default=False)
