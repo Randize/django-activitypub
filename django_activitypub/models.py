@@ -463,7 +463,7 @@ def send_create_note_to_followers(note):
         inbox = follower.profile.get('inbox')
         domain = follower.domain
         data.update(note.as_json(mode='activity', base_url=f'https://{domain}'))
-        data['object']['tag'] = list(parse_mentions(note.content)) + list(parse_hashtags(note.content,      domain))
+        data['object']['tag'] = list(parse_mentions(note.content)) + list(parse_hashtags(note.content, domain))
         try:
             resp = signed_post(
                 inbox,
