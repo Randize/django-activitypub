@@ -645,11 +645,11 @@ def get_with_url(url):
 @receiver(post_save, sender=Note)
 def note_dispatch(sender, instance, created, **kwargs):
     note = instance
-    if not note.tombstone:
-        if created:
-            send_create_note_to_followers(note)
-        else:
-            send_update_note_to_followers(note)
+    # if not note.tombstone:
+    #     if created:
+    #         send_create_note_to_followers(note)
+    #     else:
+    #         send_update_note_to_followers(note)
 
 
 @receiver(post_save, sender=ImageAttachment)
@@ -657,6 +657,8 @@ def imageAttachment_note_sync(sender, instance, **kwargs):
     if instance.note:
         instance.note.attachments.add(instance)
         instance.note.save()
+    if instance.note.tombstone is False:
+        send_create_note_to_followers(instance.note)
 
 
 @receiver(post_delete, sender=ImageAttachment)
