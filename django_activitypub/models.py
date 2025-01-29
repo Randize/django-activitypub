@@ -656,8 +656,6 @@ def note_dispatch(sender, instance, created, **kwargs):
 def imageAttachment_note(sender, instance, action, reverse, pk_set, **kwargs):
     if action == "post_add":
         print(f"Attachments {pk_set} added to Note {instance.id}")
-        if not instance.tombstone:
-            send_create_note_to_followers(instance)
     elif action == "post_remove":
         print(f"Attachments {pk_set} removed from Note {instance.id}")
     elif action == "post_clear":
