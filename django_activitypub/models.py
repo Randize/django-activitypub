@@ -441,6 +441,8 @@ def parse_html(content, base_url):
         r'<span class="invisible">\1</span>\2</a>',
         content
     )
+    re.sub(r'(?<=\n)(?:#\w+\s*)+', '', content)
+    # hashtags = re.findall(r'#\w+', match.group()) if match else []
     hashtag_pattern = re.compile(r'#(\w+)')
     content = hashtag_pattern.sub(r'<a href="{}/tags/\1" class="mention hashtag status-link" rel="tag">#\1</a>'.format(base_url), content)
     paragraphs = content.split('\n')
