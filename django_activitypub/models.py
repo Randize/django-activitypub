@@ -8,7 +8,7 @@ from django.contrib.auth import get_user_model
 from django.db import models
 from django.utils import timezone
 from django.conf import settings
-from django.db.models.signals import post_save, post_delete
+from django.db.models.signals import post_save, post_delete, m2m_changed
 from django.dispatch import receiver
 from django.utils.html import escape
 from django.utils.safestring import mark_safe
@@ -652,17 +652,13 @@ def note_dispatch(sender, instance, created, **kwargs):
     #         send_update_note_to_followers(note)
 
 
-@receiver(post_save, sender=ImageAttachment)
-def imageAttachment_note_sync(sender, instance, **kwargs):
-    if instance.note:
-        instance.note.attachments.add(instance)
-        instance.note.save()
-    if instance.note.tombstone is False:
-        send_create_note_to_followers(instance.note)
-
-
-@receiver(post_delete, sender=ImageAttachment)
-def imageAttachment_note_delete(sender, instance, **kwargs):
-    if instance.note:
-        instance.note.attachments.delete(instance)
-        instance.note.save()
+@receiver(m2m_changed, sender=Note.attachments.through)
+def imageAttachment_note(sender, instance, action, reverse, pk_set, **kwargs):
+    if action == "post_add":
+        print(f"Attachments {pk_set} added to Note {instance.id}")
+        if not instance.tombstone:
+            send_create_note_to_followers(instance)
+    elif action == "post_remove":
+        print(f"Attachments {pk_set} removed from Note {instance.id}")
+    elif action == "post_clear":
+        print(f"All attachments removed from Note {instance.id}")
