@@ -299,7 +299,9 @@ class Note(TreeNode):
     def content_html(self, base_url):
         return parse_html(self.content, base_url)
 
-    def as_json(self, mode = 'activity', base_url = f'https://{self.actor.domain}'):
+    def as_json(self, mode = 'activity', base_url = None):
+        if not base_url:
+            base_url = f'https://{self.actor.domain}'
         if self.published_at:
             published = self.published_at
         else:
