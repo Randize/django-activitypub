@@ -14,7 +14,7 @@ admin.site.register(Following)
 
 @admin.register(Note)
 class NoteAdmin(admin.ModelAdmin):
-    list_display = ('__str__', 'id', 'tombstone', 'updated_at')
+    list_display = ('__str__', 'id', 'tombstone', 'ready', 'updated_at')
     inlines = [ImageAttachmentInline]
     
 @admin.register(LocalActor)
