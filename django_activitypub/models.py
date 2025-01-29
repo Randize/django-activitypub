@@ -324,11 +324,11 @@ class Note(TreeNode):
         }
         if self.images:
             for image in self.images.all():
-                with Image.open(image) as img:
+                with Image.open(image.image) as img:
                     object['attachment'] += [{
                         "type": "Image",
                         "mediaType": Image.MIME[img.format],
-                        "url": image.url,
+                        "url": image,
                         "name": image.caption,
                         # "blurhash": "UuNw+oS3_NkCR:ayM|oMyDoLIBj[t7ofaLay",
                         "focalPoint": [0.5, 0.5],
@@ -384,7 +384,7 @@ class Note(TreeNode):
 
 class ImageAttachment(models.Model):
     note = models.ForeignKey(Note, on_delete=models.CASCADE, related_name='images')
-    image = models.ImageField(upload_to='img', blank=True, null=True)
+    attachment = models.ImageField(upload_to='img', blank=True, null=True)
     caption = models.TextField(blank=True, null=True)
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
