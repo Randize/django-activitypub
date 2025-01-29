@@ -533,9 +533,10 @@ def send_delete_note_to_followers(note):
             resp.raise_for_status()
         except Exception as e:
             print(f'signed_post - {str(e)}')
-        print(f'{follower.__str__()} - tombstoned')
-        note.tombstone = True
-        note.save()
+        if resp.status_code != 404:
+            print(f'{follower.__str__()} - tombstoned')
+            note.tombstone = True
+            note.save()
 
 
 def delete_all_notes():
