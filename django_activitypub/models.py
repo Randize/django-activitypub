@@ -438,7 +438,7 @@ def parse_html(content):
         content
     )
     hashtag_pattern = re.compile(r'#(\w+)')
-    content = hashtag_pattern.sub(r'<a href="/hashtags/\1" class="mention hashtag status-link" rel="tag">#\1</a>', content)
+    content = hashtag_pattern.sub(r'<a href="/tags/\1" class="mention hashtag status-link" rel="tag">#\1</a>', content)
     paragraphs = content.split('\n')
     formatted_text = ''.join(f'<p>{para.strip()}</p>' for para in paragraphs if para.strip())
     return mark_safe(formatted_text)
