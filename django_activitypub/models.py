@@ -644,12 +644,14 @@ def get_with_url(url):
 
 @receiver(post_save, sender=Note)
 def note_dispatch(sender, instance, created, **kwargs):
-    note = instance
+    if not instance.tombstone:
+        if not instance.attachments:
+            instance.attachments = ImageAttachment.objects.get_or_create(note=instance)
     # if not note.tombstone:
     #     if created:
-    #         send_create_note_to_followers(note)
+    #         send_create_note_to_followers(instance)
     #     else:
-    #         send_update_note_to_followers(note)
+    #         send_update_note_to_followers(instance)
 
 
 @receiver(post_save, sender=ImageAttachment)
