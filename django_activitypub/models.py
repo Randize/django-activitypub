@@ -323,7 +323,7 @@ class Note(TreeNode):
             },
         }
         if self.images:
-            for image in self.images:
+            for image in self.images.all():
                 with Image.open(image) as img:
                     object['attachment'] += [{
                         "type": "Image",
