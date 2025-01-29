@@ -459,26 +459,25 @@ def send_create_note_to_followers(note):
     data.update(note.as_json(mode='activity'))
     followers = actor.followers.all().exclude(id__in=[f.remote_actor.id for f in note.outbox.all()])
     for follower in followers:
-        if follower not in outbox:
-            inbox = follower.profile.get('inbox')
-            domain = follower.domain
-            data['object']['tag'] = list(parse_mentions(note.content)) + list(parse_hashtags(note.content, domain))
-            try:
-                resp = signed_post(
-                    inbox,
-                    actor.private_key.encode('utf-8'),
-                    f'{actor_url}#main-key',
-                    body=json.dumps(data)
-                )
-                resp.raise_for_status()
-                note.outbox.add(Follower.objects.get(remote_actor=follower))
+        inbox = follower.profile.get('inbox')
+        domain = follower.domain
+        data['object']['tag'] = list(parse_mentions(note.content)) + list(parse_hashtags(note.content,      domain))
+        try:
+            resp = signed_post(
+                inbox,
+                actor.private_key.encode('utf-8'),
+                f'{actor_url}#main-key',
+                body=json.dumps(data)
+            )
+            resp.raise_for_status()
+            note.outbox.add(Follower.objects.get(remote_actor=follower))
 
-                print(f'send_create_note_to_followers - {follower.__str__()} - {resp.status_code}')
-            except Exception as e: 
-                # TODO: gracefully handle deleted followers so replies stay
-                # if re.findall(r'Not Found', str(e)):
-                #     follower.delete()
-                print(f'send_create_note_to_followers - error - {e}')
+            print(f'send_create_note_to_followers - {follower.__str__()} - {resp.status_code}')
+        except Exception as e: 
+            # TODO: gracefully handle deleted followers so replies stay
+            # if re.findall(r'Not Found', str(e)):
+            #     follower.delete()
+            print(f'send_create_note_to_followers - error - {e}')
 
 def send_update_note_to_followers(note):
     if note.local_actor:
