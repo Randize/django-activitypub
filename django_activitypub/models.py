@@ -324,7 +324,7 @@ class Note(TreeNode):
         }
         if self.images:
             for image in self.images.all():
-                with Image.open(image.image) as img:
+                with Image.open(image.attachment) as img:
                     object['attachment'] += [{
                         "type": "Image",
                         "mediaType": Image.MIME[img.format],
@@ -533,7 +533,7 @@ def send_delete_note_to_followers(note):
             resp.raise_for_status()
         except Exception as e:
             print(f'signed_post - {str(e)}')
-        print(f'{note.__str__()} tombstoned')
+        print(f'{follower.__str__()} - tombstoned')
         note.tombstone = True
         note.save()
 
