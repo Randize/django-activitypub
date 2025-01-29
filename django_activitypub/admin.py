@@ -8,7 +8,7 @@ class ImageAttachmentInline(admin.TabularInline):
 
     def formfield_for_dbfield(self, db_field, **kwargs):
         field = super().formfield_for_dbfield(db_field, **kwargs)
-        if db_field.name == "file":
+        if db_field.name == "attachment":
             field.widget.attrs.update({"class": "no-clearable-file"})  # Custom CSS
         return field
 
