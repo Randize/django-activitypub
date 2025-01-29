@@ -330,8 +330,8 @@ class Note(TreeNode):
                 'totalItems': self.announces.count()
             },
         }
-        if self.images:
-            for image in self.images.all():
+        if self.attachments.count():
+            for image in self.attachments.all():
                 with Image.open(os.path.join(settings.MEDIA_ROOT, image.attachment.name)) as img:
                     object['attachment'] += [{
                         "type": "Image",
@@ -652,13 +652,6 @@ def note_dispatch(sender, instance, created, **kwargs):
         elif instance.attachments.count() and not instance.attachments.filter(attachment='').exists():
             send_create_note_to_followers(instance)
 
-    # if not note.tombstone:
-    #     if created:
-    #         send_create_note_to_followers(instance)
-    #     else:
-    #         send_update_note_to_followers(instance)
-
-
 @receiver(post_save, sender=ImageAttachment)
 def imageAttachment_note_add(sender, instance, created, **kwargs):
     if instance.note:  
@@ -677,8 +670,8 @@ def imageAttachment_note_del(sender, instance, **kwargs):
 def imageAttachment_note(sender, instance, action, reverse, pk_set, **kwargs):
     if action == "post_add":
         print(f"Attachments {pk_set} added to Note {instance.id}")
-        if instance.note.attachments.filter(attachment='').exists():
-            instance.note.attachments.get(attachment='').delete()
+        if instance.images.filter(attachment='').exists():
+            instance.images.filter(attachment='').delete()
     elif action == "post_remove":
         print(f"Attachments {pk_set} removed from Note {instance.id}")
     elif action == "post_clear":
