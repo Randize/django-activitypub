@@ -1,6 +1,6 @@
 import json
 import urllib.parse
-import uuid, re
+import uuid, re, os
 
 import requests
 from django.urls import resolve, reverse
@@ -324,7 +324,7 @@ class Note(TreeNode):
         }
         if self.images:
             for image in self.images.all():
-                with Image.open(image.attachment) as img:
+                with Image.open(os.path.join(settings.MEDIA_ROOT, image.attachment)) as img:
                     object['attachment'] += [{
                         "type": "Image",
                         "mediaType": Image.MIME[img.format],
