@@ -396,6 +396,9 @@ class ImageAttachment(models.Model):
     caption = models.TextField(blank=True, null=True)
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
+    def __str__(self):
+        return self.attachment.name
+
     
 def parse_hashtags(content, domain):
     for t in re.findall(r'#\w+', content):
