@@ -462,7 +462,7 @@ def send_create_note_to_followers(note):
     for follower in followers:
         inbox = follower.profile.get('inbox')
         domain = follower.domain
-        data.update(note.as_json(mode='activity'), f'https://{domain}')
+        data.update(note.as_json(mode='activity', base_url=f'https://{domain}'))
         data['object']['tag'] = list(parse_mentions(note.content)) + list(parse_hashtags(note.content,      domain))
         try:
             resp = signed_post(
@@ -497,7 +497,7 @@ def send_update_note_to_followers(note):
     for follower in note.local_actor.followers.all():
         inbox = follower.profile.get('inbox')
         domain = follower.domain
-        data.update(note.as_json(mode='update'), f'https://{domain}')
+        data.update(note.as_json(mode='update', base_url=f'https://{domain}'))
         data['object']['tag'] = list(parse_mentions(note.content)) + list(parse_hashtags(note.content, domain))
         try:
             resp = signed_post(
@@ -575,7 +575,7 @@ def send_old_notes(local_actor, remote_actor):
     }
     notes = Note.objects.order_by('-published_at').filter(local_actor=local_actor)
     for note in notes:
-        data.update(note.as_json(mode='update'), f'https://{domain}')
+        data.update(note.as_json(mode='update', base_url=f'https://{domain}'))
         data['object']['tag'] = list(parse_mentions(note.content)) + list(parse_hashtags(note.content, domain))
         try:
             resp = signed_post(
