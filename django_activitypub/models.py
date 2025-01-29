@@ -261,7 +261,7 @@ class NoteManager(TreeQuerySet):
                 note.parent = get_with_url(reply_url)
             else:
                 note.parent = Note.objects.upsert_remote(base_url, get_object(reply_url))
-        note.save(content_url=base_url, note=note)
+        note.save()
         return note
     
 
