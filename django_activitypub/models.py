@@ -5,7 +5,7 @@ import uuid, re, os
 import requests
 from django.urls import resolve, reverse
 from django.contrib.auth import get_user_model
-from django.db import models
+from django.db import models, transaction
 from django.utils import timezone
 from django.conf import settings
 from django.db.models.signals import post_save, post_delete, m2m_changed
@@ -651,9 +651,11 @@ def get_with_url(url):
 @receiver(post_save, sender=Note)
 def note_dispatch(sender, instance, created, **kwargs):
     if not instance.tombstone and instance.ready:
-        send_create_note_to_followers(instance)
-        instance.ready = False
-        instance.save()
+        def process_note():
+            send_create_note_to_followers(instance)
+            instance.ready = False
+            instance.update(update_fields=["ready"])
+        transaction.on_commit(process_note)
 
 @receiver(post_save, sender=ImageAttachment)
 def imageAttachment_note_add(sender, instance, created, **kwargs):
