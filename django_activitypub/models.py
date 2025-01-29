@@ -452,15 +452,16 @@ def send_create_note_to_followers(note):
     elif note.parent and note.parent.local_actor:
         actor = note.parent.local_actor
     actor_url = actor.get_absolute_url()
-    followers = actor.followers.all()
     data = {'@context' : [
         'https://www.w3.org/ns/activitystreams',
         "https://w3id.org/security/v1"
     ]}
     data.update(note.as_json(mode='activity'))
-
+    followers = actor.followers.all()
+    outbox = note.outbox.all()
+    followers = followers.exclude(id__in=outbox.values('id'))
     for follower in followers:
-        if follower not in note.outbox.all():
+        if follower not in outbox:
             inbox = follower.profile.get('inbox')
             domain = follower.domain
             data['object']['tag'] = list(parse_mentions(note.content)) + list(parse_hashtags(note.content, domain))
