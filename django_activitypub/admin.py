@@ -10,7 +10,8 @@ class ImageAttachmentInline(admin.TabularInline):
         field = super().formfield_for_dbfield(db_field, **kwargs)
         if db_field.name == "attachment":
             field.widget.attrs.update({"class": "no-clearable-file"})  # Custom CSS
-        return field
+            return field
+        return super().formfield_for_dbfield(db_field, **kwargs)
 
     class Media:
         css = {"all": ("admin/css/hide_clear_link.css",)}  # Custom CSS file
