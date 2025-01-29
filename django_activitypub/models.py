@@ -277,6 +277,7 @@ class Note(TreeNode):
     announces = models.ManyToManyField(RemoteActor, blank=True, related_name='announces')
     sensitive = models.BooleanField(default=False)
     tombstone = models.BooleanField(default=False)
+    attachments = models.ManyToManyField('ImageAttachment', related_name='attachments')
 
     objects = NoteManager.as_manager()
 
