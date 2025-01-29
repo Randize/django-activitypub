@@ -654,7 +654,7 @@ def note_dispatch(sender, instance, created, **kwargs):
         def process_note():
             send_create_note_to_followers(instance)
             instance.ready = False
-            instance.update(update_fields=["ready"])
+            instance.save(update_fields=["ready"])
         transaction.on_commit(process_note)
 
 @receiver(post_save, sender=ImageAttachment)
