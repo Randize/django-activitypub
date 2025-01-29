@@ -473,7 +473,7 @@ def send_create_note_to_followers(note):
                     body=json.dumps(data)
                 )
                 resp.raise_for_status()
-                note.outbox.add(follower)
+                note.outbox.add(Follower.objects.get(remote_actor=follower))
 
                 print(f'send_create_note_to_followers - {follower.__str__()} - {resp.status_code}')
             except Exception as e: 
