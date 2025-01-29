@@ -24,6 +24,13 @@ from django_activitypub.utils.dates import format_datetime, parse_datetime
 from django_activitypub.webfinger import fetch_remote_profile, finger
 
 
+def content_id_generator():
+    while True:
+        content_id = str(uuid.uuid4().int)[:18]  # Generate a unique ID
+        if not Note.objects.filter(content_id=content_id).exists():
+            return content_id  # Return only if unique
+
+
 class ActorChoices(models.TextChoices):
     PERSON = 'P', 'Person'
     SERVICE = 'S', 'Service'
@@ -265,7 +272,7 @@ class Note(TreeNode):
     updated_at = models.DateTimeField(auto_now=True)
     content = models.TextField()
     content_url = models.URLField(db_index=True, help_text="The absolute URL of the content to be published.")
-    content_id = models.CharField(max_length=18, unique=True, default=str(uuid.uuid4().int)[:18], editable=False)
+    content_id = models.CharField(max_length=18, unique=True, default=content_id_generator, editable=False)
     likes = models.ManyToManyField(RemoteActor, blank=True, related_name='likes')
     announces = models.ManyToManyField(RemoteActor, blank=True, related_name='announces')
     sensitive = models.BooleanField(default=False)
