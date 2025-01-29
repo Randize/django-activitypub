@@ -328,7 +328,7 @@ class Note(TreeNode):
                     object['attachment'] += [{
                         "type": "Image",
                         "mediaType": Image.MIME[img.format],
-                        "url": image,
+                        "url": f'https://{self.actor.domain}{image.attachment.url}',
                         "name": image.caption,
                         # "blurhash": "UuNw+oS3_NkCR:ayM|oMyDoLIBj[t7ofaLay",
                         "focalPoint": [0.5, 0.5],
