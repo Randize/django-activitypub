@@ -652,6 +652,20 @@ def note_dispatch(sender, instance, created, **kwargs):
     #         send_update_note_to_followers(note)
 
 
+@receiver(post_save, sender=ImageAttachment)
+def imageAttachment_note_add(sender, instance, created, **kwargs):
+    if instance.note:  
+        instance.note.attachments.add(instance) 
+        instance.note.save() 
+
+
+@receiver(post_delete, sender=ImageAttachment)
+def imageAttachment_note_del(sender, instance, **kwargs):
+    if instance.note: 
+        instance.note.attachments.remove(instance) 
+        instance.note.save()
+
+
 @receiver(m2m_changed, sender=Note.attachments.through)
 def imageAttachment_note(sender, instance, action, reverse, pk_set, **kwargs):
     if action == "post_add":
