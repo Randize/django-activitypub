@@ -457,9 +457,7 @@ def send_create_note_to_followers(note):
         "https://w3id.org/security/v1"
     ]}
     data.update(note.as_json(mode='activity'))
-    followers = actor.followers.all()
-    outbox = note.outbox.all()
-    followers = followers.exclude(id__in=outbox.values('id'))
+    followers = actor.followers.all().exclude(id__in=[f.remote_actor.id for f in note.outbox.all()])
     for follower in followers:
         if follower not in outbox:
             inbox = follower.profile.get('inbox')
