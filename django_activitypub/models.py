@@ -296,10 +296,10 @@ class Note(TreeNode):
             return f'https://{self.local_actor.domain}' + reverse('activitypub-notes-statuses', kwargs={'username': self.local_actor.preferred_username, 'id': self.content_id})
         return self.content_url
     
-    def content_html(self):
-        return parse_html(self.content)
+    def content_html(self, base_url):
+        return parse_html(self.content, base_url)
 
-    def as_json(self, mode = 'activity'):
+    def as_json(self, mode = 'activity', base_url = f'https://{self.actor.domain}'):
         if self.published_at:
             published = self.published_at
         else:
@@ -314,9 +314,9 @@ class Note(TreeNode):
             'to': ['https://www.w3.org/ns/activitystreams#Public'],
             'cc': [f'https://{self.actor.domain}' + reverse('activitypub-followers', kwargs={'username': self.actor.preferred_username})],
             'sensitive': self.sensitive,
-            'atomUri': f'https://{self.local_actor.domain}' + reverse('activitypub-notes-statuses', kwargs={'username': self.local_actor.preferred_username, 'id': self.content_id}),
+            'atomUri': f'https://{self.actor.domain}' + reverse('activitypub-notes-statuses', kwargs={'username': self.actor.preferred_username, 'id': self.content_id}),
             'conversation': None,
-            'content': self.content_html(), 
+            'content': self.content_html(base_url), 
             'contentMap': {}, # TODO: Auto translation to other languages e.g. {"en":"<p>厚塗り好きです！人型多め。異形も描けます:blobartist:</p>"}
             'attachment': [], # TODO: Image attachment
             'tag': [],
@@ -429,7 +429,7 @@ def parse_mentions(content):
         }
 
 
-def parse_html(content):
+def parse_html(content, base_url):
     if not content:
         return ''
     content = escape(content)
@@ -440,7 +440,7 @@ def parse_html(content):
         content
     )
     hashtag_pattern = re.compile(r'#(\w+)')
-    content = hashtag_pattern.sub(r'<a href="/tags/\1" class="mention hashtag status-link" rel="nofollow noopener tag" target="_blank">#\1</a>', content)
+    content = hashtag_pattern.sub(r'<a href="{}/tags/\1" class="mention hashtag status-link" rel="nofollow noopener tag" target="_blank">#\1</a>'.format(base_url), content)
     paragraphs = content.split('\n')
     formatted_text = ''.join(f'<p>{para.strip()}</p>' for para in paragraphs if para.strip())
     return mark_safe(formatted_text)
@@ -456,11 +456,11 @@ def send_create_note_to_followers(note):
         'https://www.w3.org/ns/activitystreams',
         "https://w3id.org/security/v1"
     ]}
-    data.update(note.as_json(mode='activity'))
     followers = actor.followers.all().exclude(id__in=[f.remote_actor.id for f in note.outbox.all()])
     for follower in followers:
         inbox = follower.profile.get('inbox')
         domain = follower.domain
+        data.update(note.as_json(mode='activity'), f'https://{domain}')
         data['object']['tag'] = list(parse_mentions(note.content)) + list(parse_hashtags(note.content,      domain))
         try:
             resp = signed_post(
@@ -491,11 +491,11 @@ def send_update_note_to_followers(note):
             "https://w3id.org/security/v1"
         ],
     }
-    data.update(note.as_json(mode='update'))
 
     for follower in note.local_actor.followers.all():
         inbox = follower.profile.get('inbox')
         domain = follower.domain
+        data.update(note.as_json(mode='update'), f'https://{domain}')
         data['object']['tag'] = list(parse_mentions(note.content)) + list(parse_hashtags(note.content, domain))
         try:
             resp = signed_post(
@@ -573,7 +573,7 @@ def send_old_notes(local_actor, remote_actor):
     }
     notes = Note.objects.order_by('-published_at').filter(local_actor=local_actor)
     for note in notes:
-        data.update(note.as_json(mode='update'))
+        data.update(note.as_json(mode='update'), f'https://{domain}')
         data['object']['tag'] = list(parse_mentions(note.content)) + list(parse_hashtags(note.content, domain))
         try:
             resp = signed_post(
