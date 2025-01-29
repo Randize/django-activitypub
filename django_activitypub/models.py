@@ -645,8 +645,13 @@ def get_with_url(url):
 @receiver(post_save, sender=Note)
 def note_dispatch(sender, instance, created, **kwargs):
     if not instance.tombstone:
-        if not instance.attachments:
-            instance.attachments = ImageAttachment.objects.get_or_create(note=instance)
+        if not instance.attachments.count():
+            image, created = ImageAttachment.objects.get_or_create(note=instance)
+            instance.attachments = image
+            instance.save()
+        elif instance.attachments.count() and not instance.attachments.filter(attachment='').exists():
+            send_create_note_to_followers(instance)
+
     # if not note.tombstone:
     #     if created:
     #         send_create_note_to_followers(instance)
@@ -657,6 +662,9 @@ def note_dispatch(sender, instance, created, **kwargs):
 @receiver(post_save, sender=ImageAttachment)
 def imageAttachment_note_add(sender, instance, created, **kwargs):
     if instance.note:  
+        if instance.note.attachments.filter(attachment='').exists():
+            instance.note.attachments.get(attachment='').delete()
+
         instance.note.attachments.add(instance) 
         instance.note.save() 
 
