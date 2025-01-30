@@ -651,7 +651,7 @@ def get_with_url(url):
 
 @receiver(post_save, sender=Note)
 def note_dispatch(sender, instance, created, **kwargs):
-    if not instance.tombstone and instance.ready:
+    if not instance.tombstone and instance.ready and instance.local_actor:
         def process_note():
             send_create_note_to_followers(instance)
             instance.ready = False
