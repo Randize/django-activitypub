@@ -544,13 +544,18 @@ def send_delete_note_to_followers(note):
             'atomUri': note.get_absolute_url()
         },
     }
+    resp = send_to_followers(note.local_actor, data)
+    if resp.status_code != 404:
+        note.tombstone = True
+        note.save()
 
-    for follower in note.local_actor.followers.all():
+def send_to_followers(actor, data):
+    for follower in actor.followers.all():
         try:
             resp = signed_post(
                 follower.profile.get('inbox'),
-                note.local_actor.private_key.encode('utf-8'),
-                f'{actor_url}#main-key',
+                actor.private_key.encode('utf-8'),
+                f'{actor.get_absolute_url()}#main-key',
                 body=json.dumps(data)
             )
             if resp.status_code == 404:
@@ -565,8 +570,7 @@ def send_delete_note_to_followers(note):
             print(f'signed_post - {str(e)}')
         if resp.status_code != 404:
             print(f'{follower.__str__()} - tombstoned')
-            note.tombstone = True
-            note.save()
+        return resp
 
 
 def delete_all_notes():
@@ -648,6 +652,32 @@ def send_unfollow(local_actor, remote_actor):
     if Following.objects.filter(following=local_actor, remote_actor=remote_actor):
         Following.objects.get(following=local_actor, remote_actor=remote_actor).delete()
 
+
+def send_update_profile(local_actor):
+    activity_id = local_actor.get_absolute_url() + f'?update={(datetime.now().strftime("%Y%m%d%H%M%S") + str(uuid.uuid4().int))[:18]}'
+    data = {
+        "@context": "https://www.w3.org/ns/activitystreams",
+        "id": activity_id,
+        "type": "Update",
+        "actor": local_actor.get_absolute_url(),
+        "to": ["https://www.w3.org/ns/activitystreams#Public"],
+        "object": {
+            "id": activity_id,
+            "type": "Person",
+            "name": local_actor.name,
+            "summary": local_actor.summary,
+            "icon": {
+                "type": "Image",
+                "url": f'https://{local_actor.domain}{local_actor.icon.url}'
+            },
+            "image": {
+                "type": "Image",
+                "url": f'https://{local_actor.domain}{local_actor.image.url}'
+            }
+        }
+    }
+    resp = send_to_followers(local_actor, data)
+    
 
 def get_object(url):
     resp = requests.get(url, headers={'Accept': 'application/activity+json'})
