@@ -388,6 +388,10 @@ class Note(TreeNode):
     @property
     def actor(self):
         return self.local_actor or self.remote_actor
+    
+    @property
+    def actor_handle(self):
+        return self.actor.handle
 
     @property
     def max_depth(self):
