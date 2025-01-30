@@ -1,12 +1,14 @@
 document.addEventListener("DOMContentLoaded", function() {
-    let selector = document.getElementById("template-selector");
-    let textarea = document.getElementById("id_content");
+    var dropdown = document.getElementById("template-selector");
+    var contentField = document.getElementById("id_content"); // Adjust based on Django field ID
 
-    if (selector && textarea) {
-        selector.addEventListener("change", function() {
-            if (this.value) {
-                textarea.value = this.value + textarea.value; // Prepend template text
-                this.selectedIndex = 0; // Reset dropdown after selection
+    if (dropdown && contentField) {
+        dropdown.addEventListener("change", function() {
+            var selectedTemplate = dropdown.value;
+
+            if (selectedTemplate) {
+                contentField.value = ""; // Clears the text field before adding the template
+                contentField.value = selectedTemplate;
             }
         });
     }
