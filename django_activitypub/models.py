@@ -90,6 +90,55 @@ class LocalActor(models.Model):
 
     def get_absolute_url(self):
         return f'https://{self.domain}' + reverse('activitypub-profile', kwargs={'username': self.preferred_username})
+    
+    def as_json(self):
+        object = {
+            'id': f'https://{self.actor.domain}' + reverse('activitypub-profile', kwargs={'username': self.actor.preferred_username}),
+            'type': 'Person',
+            'following': f'https://{self.actor.domain}' + reverse('activitypub-following', kwargs={'username': self.actor.preferred_username}),
+            'followers': f'https://{self.actor.domain}' + reverse('activitypub-followers', kwargs={'username': self.actor.preferred_username}),
+            'inbox': f'https://{self.actor.domain}' + reverse('activitypub-inbox', kwargs={'username': self.actor.preferred_username}),
+            'outbox': f'https://{self.actor.domain}' + reverse('activitypub-outbox', kwargs={'username': self.actor.preferred_username}),
+            'featured': None,
+            'featuredTags': None,
+            'name': self.actor.name,
+            'preferredUsername': self.actor.preferred_username,
+            'summary': self.actor.summary,
+            'url': f'https://{self.actor.domain}' + reverse('activitypub-profile-short', kwargs={'username': self.actor.preferred_username}),
+            'manuallyApprovesFollowers': False,
+            'discoverable': True,
+            'indexable': True, # default False - Makes posts searchable or not
+            'published': '2025-01-01T00:00:00Z',
+            'devices': None,
+            'publicKey': {
+                'id': f'{self.actor.get_absolute_url()}#main-key',
+                'owner': self.actor.get_absolute_url(),
+                'publicKeyPem': self.actor.public_key
+            },
+            'attributionDomains': f'https://{self.actor.domain}',
+            'attachment': [{
+                'type': 'PropertyValue',
+                'name': 'Website',
+                'value': f'<a href="https://{self.actor.domain}" translate="no"><span class="">{self.actor.domain}</span><span class="invisible"></span></a>'
+            }],
+        }
+        if self.actor.icon:
+            object['icon'] = {
+                'type': 'Image',
+                'mediaType': 'image/jpeg',  # todo make this dynamic
+                'url': f'{self.actor.domain}{self.actor.icon.url}',
+                'sensitive': False,
+                'name': None,
+            }
+        if self.actor.image:
+            object['image'] = {
+                'type': 'Image',
+                'mediaType': 'image/jpeg',  # todo make this dynamic
+                'url': f'{self.actor.domain}{self.actor.image.url}',
+                'sensitive': False,
+                'name': None,
+            }
+        return object
 
     def save(self, *args, **kwargs):
         if not self.id:
@@ -656,26 +705,13 @@ def send_unfollow(local_actor, remote_actor):
 def send_update_profile(local_actor):
     activity_id = local_actor.get_absolute_url() + f'?update={(datetime.now().strftime("%Y%m%d%H%M%S") + str(uuid.uuid4().int))[:18]}'
     data = {
-        "@context": "https://www.w3.org/ns/activitystreams",
+        "@context": ["https://www.w3.org/ns/activitystreams", "https://w3id.org/security/v1"],
         "id": activity_id,
         "type": "Update",
         "actor": local_actor.get_absolute_url(),
         "to": ["https://www.w3.org/ns/activitystreams#Public"],
-        "object": {
-            "id": activity_id,
-            "type": "Person",
-            "name": local_actor.name,
-            "summary": local_actor.summary,
-            "icon": {
-                "type": "Image",
-                "url": f'https://{local_actor.domain}{local_actor.icon.url}'
-            },
-            "image": {
-                "type": "Image",
-                "url": f'https://{local_actor.domain}{local_actor.image.url}'
-            }
-        }
     }
+    data['object'] = local_actor.as_json()
     resp = send_to_followers(local_actor, data)
     
 

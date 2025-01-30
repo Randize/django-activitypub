@@ -181,7 +181,7 @@ def profile(request, username):
         'url': request.build_absolute_uri(reverse('activitypub-profile-short', kwargs={'username': actor.preferred_username})),
         'id': request.build_absolute_uri(reverse('activitypub-profile', kwargs={'username': actor.preferred_username})),
         'followers': request.build_absolute_uri(reverse('activitypub-followers', kwargs={'username': actor.preferred_username})),
-        # 'followings': request.build_absolute_uri(reverse('activitypub-followings', kwargs={'username': actor.preferred_username})),
+        'following': request.build_absolute_uri(reverse('activitypub-following', kwargs={'username': actor.preferred_username})),
         'inbox': request.build_absolute_uri(reverse('activitypub-inbox', kwargs={'username': actor.preferred_username})),
         'outbox': request.build_absolute_uri(reverse('activitypub-outbox', kwargs={'username': actor.preferred_username})),
         'publicKey': {
@@ -320,7 +320,7 @@ def followings(request, username):
     query = Following.objects.order_by('-follow_date').select_related('remote_actor').filter(following=actor)
     paginator = Paginator(query, 10)
     page_num_arg = request.GET.get('page', None)
-    followers_url = request.build_absolute_uri(reverse('activitypub-followings', kwargs={'username': actor.preferred_username}))
+    followers_url = request.build_absolute_uri(reverse('activitypub-following', kwargs={'username': actor.preferred_username}))
     data = {
         '@context': 'https://www.w3.org/ns/activitystreams',
         'type': 'OrderedCollection',

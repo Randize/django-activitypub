@@ -21,7 +21,7 @@ urlpatterns = [
     path('pub/<slug:username>/statuses/<str:id>/delete', notes, \
         kwargs={'mode': 'delete'}, name='activitypub-notes-delete'),
     path('pub/<slug:username>/followers', followers, name='activitypub-followers'),
-    path('pub/<slug:username>/followings', followings, name='activitypub-followings'),
+    path('pub/<slug:username>/following', followings, name='activitypub-following'),
     path('pub/<slug:username>/inbox', inbox, name='activitypub-inbox'),
     path('pub/<slug:username>/outbox', outbox, name='activitypub-outbox'),
 ]
