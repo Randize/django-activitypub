@@ -1,5 +1,7 @@
 from django.contrib import admin
 from django.db import models
+from django.db.models import F
+from django.db.models.functions import Substr
 from django.forms import Textarea
 from django.utils.safestring import mark_safe
 
@@ -26,7 +28,9 @@ class NoteAdmin(admin.ModelAdmin):
     def formfield_for_dbfield(self, db_field, **kwargs):
         """Customize the TextField to include a dynamic dropdown menu"""
         if db_field.name == "content":
-            templates = NoteTemplate.objects.all()
+            templates = NoteTemplate.objects.annotate(
+                            substring_name=Substr('name', 3, 9999)  # Start from the 3rd character (1-based index)
+                        ).order_by('substring_name')
             dropdown_html = '<select id="template-selector"><option value="">-- Choose a Template --</option>'
             for template in templates:
                 dropdown_html += f'<option value="{template.content}">{template.name}</option>'
