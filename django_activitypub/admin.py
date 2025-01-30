@@ -20,6 +20,7 @@ admin.site.register(Following)
 @admin.register(Note)
 class NoteAdmin(admin.ModelAdmin):
     list_display = ('__str__', 'id', 'actor_handle', 'tombstone', 'ready', 'updated_at')
+    exclude = ('RemoteActor',)
     inlines = [ImageAttachmentInline]
     
     class Media:
