@@ -398,6 +398,14 @@ class Note(TreeNode):
         return min(getattr(self, 'tree_depth', 1), 5)
     
 
+class NoteTemplate(models.Model):
+    name = models.CharField(max_length=250)
+    content = models.TextField()
+
+    def __str__(self):
+        return self.name
+    
+
 class ImageAttachment(models.Model):
     note = models.ForeignKey(Note, on_delete=models.CASCADE, related_name='images')
     attachment = models.ImageField(upload_to='img', blank=True, null=True)
