@@ -338,7 +338,9 @@ class Note(TreeNode):
         ]
 
     def __str__(self):
-        return f'{self.content_url}?id={self.content_id}'
+        if self.local_actor:
+            return f'{self.content_url}?id={self.content_id}'
+        return self.get_absolute_url()
 
     def get_absolute_url(self):
         if self.local_actor:
