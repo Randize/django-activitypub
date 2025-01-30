@@ -28,12 +28,14 @@ class NoteAdmin(admin.ModelAdmin):
         if db_field.name == "content":
             templates = NoteTemplate.objects.all()
             dropdown_html = '<select id="template-selector"><option value="">-- Choose a Template --</option>'
-            
             for template in templates:
                 dropdown_html += f'<option value="{template.content}">{template.name}</option>'
-            
             dropdown_html += '</select>'
-            return models.TextField().formfield(widget=Textarea(attrs={'rows': 5})) + mark_safe(dropdown_html)
+
+            formfield = super().formfield_for_dbfield(db_field, **kwargs)
+            formfield.widget = Textarea(attrs={'rows': 5})
+            formfield.help_text = mark_safe(dropdown_html)  # Append dropdown below field
+            return formfield
         return super().formfield_for_dbfield(db_field, **kwargs)
     
 @admin.register(LocalActor)
