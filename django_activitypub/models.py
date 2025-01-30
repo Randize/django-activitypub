@@ -569,7 +569,7 @@ def send_to_followers(actor, data):
         except Exception as e:
             print(f'signed_post - {str(e)}')
         if resp.status_code != 404:
-            print(f'{follower.__str__()} - tombstoned')
+            print(f'{follower.__str__()} - success')
         return resp
 
 
