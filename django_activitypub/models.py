@@ -93,48 +93,48 @@ class LocalActor(models.Model):
     
     def as_json(self):
         object = {
-            'id': f'https://{self.actor.domain}' + reverse('activitypub-profile', kwargs={'username': self.actor.preferred_username}),
+            'id': f'https://{self.domain}' + reverse('activitypub-profile', kwargs={'username': self.preferred_username}),
             'type': 'Person',
-            'following': f'https://{self.actor.domain}' + reverse('activitypub-following', kwargs={'username': self.actor.preferred_username}),
-            'followers': f'https://{self.actor.domain}' + reverse('activitypub-followers', kwargs={'username': self.actor.preferred_username}),
-            'inbox': f'https://{self.actor.domain}' + reverse('activitypub-inbox', kwargs={'username': self.actor.preferred_username}),
-            'outbox': f'https://{self.actor.domain}' + reverse('activitypub-outbox', kwargs={'username': self.actor.preferred_username}),
+            'following': f'https://{self.domain}' + reverse('activitypub-following', kwargs={'username': self.preferred_username}),
+            'followers': f'https://{self.domain}' + reverse('activitypub-followers', kwargs={'username': self.preferred_username}),
+            'inbox': f'https://{self.domain}' + reverse('activitypub-inbox', kwargs={'username': self.preferred_username}),
+            'outbox': f'https://{self.domain}' + reverse('activitypub-outbox', kwargs={'username': self.preferred_username}),
             'featured': None,
             'featuredTags': None,
-            'name': self.actor.name,
-            'preferredUsername': self.actor.preferred_username,
-            'summary': self.actor.summary,
-            'url': f'https://{self.actor.domain}' + reverse('activitypub-profile-short', kwargs={'username': self.actor.preferred_username}),
+            'name': self.name,
+            'preferredUsername': self.preferred_username,
+            'summary': self.summary,
+            'url': f'https://{self.domain}' + reverse('activitypub-profile-short', kwargs={'username': self.preferred_username}),
             'manuallyApprovesFollowers': False,
             'discoverable': True,
             'indexable': True, # default False - Makes posts searchable or not
             'published': '2025-01-01T00:00:00Z',
             'devices': None,
             'publicKey': {
-                'id': f'{self.actor.get_absolute_url()}#main-key',
-                'owner': self.actor.get_absolute_url(),
-                'publicKeyPem': self.actor.public_key
+                'id': f'{self.get_absolute_url()}#main-key',
+                'owner': self.get_absolute_url(),
+                'publicKeyPem': self.public_key
             },
-            'attributionDomains': [self.actor.domain],
+            'attributionDomains': [self.domain],
             'attachment': [{
                 'type': 'PropertyValue',
                 'name': 'Website',
-                'value': f'<a href="https://{self.actor.domain}" translate="no"><span class="">{self.actor.domain}</span><span class="invisible"></span></a>'
+                'value': f'<a href="https://{self.domain}" translate="no"><span class="">{self.domain}</span><span class="invisible"></span></a>'
             }],
         }
-        if self.actor.icon:
+        if self.icon:
             object['icon'] = {
                 'type': 'Image',
                 'mediaType': 'image/jpeg',  # todo make this dynamic
-                'url': f'{self.actor.domain}{self.actor.icon.url}',
+                'url': f'{self.domain}{self.icon.url}',
                 'sensitive': False,
                 'name': None,
             }
-        if self.actor.image:
+        if self.image:
             object['image'] = {
                 'type': 'Image',
                 'mediaType': 'image/jpeg',  # todo make this dynamic
-                'url': f'{self.actor.domain}{self.actor.image.url}',
+                'url': f'{self.domain}{self.image.url}',
                 'sensitive': False,
                 'name': None,
             }
