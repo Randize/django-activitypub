@@ -593,12 +593,9 @@ def send_delete_note_to_followers(note):
             'atomUri': note.get_absolute_url()
         },
     }
-    resp = send_to_followers(note.local_actor, data)
-    if resp.status_code != 404:
-        note.tombstone = True
-        note.save()
+    send_to_followers(note.local_actor, data)
 
-def send_to_followers(actor, data):
+def send_to_followers(actor, data, note=None):
     for follower in actor.followers.all():
         try:
             resp = signed_post(
@@ -618,8 +615,12 @@ def send_to_followers(actor, data):
         except Exception as e:
             print(f'signed_post - {str(e)}')
         if resp.status_code != 404:
-            print(f'{follower.__str__()} - success')
-        return resp
+            if note:
+                print(f'{follower.__str__()} - tombstoned')
+                note.tombstone = True
+                note.save()
+            else:
+                print(f'{follower.__str__()} - success')
 
 
 def delete_all_notes():
@@ -712,7 +713,7 @@ def send_update_profile(local_actor):
         "to": ["https://www.w3.org/ns/activitystreams#Public"],
     }
     data['object'] = local_actor.as_json()
-    resp = send_to_followers(local_actor, data)
+    send_to_followers(local_actor, data)
     
 
 def get_object(url):
