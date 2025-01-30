@@ -278,7 +278,7 @@ class Note(TreeNode):
     outbox = models.ManyToManyField(Follower, blank=True, related_name='outbox')
     sensitive = models.BooleanField(default=False)
     tombstone = models.BooleanField(default=False)
-    ready = models.BooleanField(default=False)
+    federate = models.BooleanField(default=False)
     attachments = models.ManyToManyField('ImageAttachment', blank=True, related_name='attachments')
 
     objects = NoteManager.as_manager()
@@ -663,11 +663,11 @@ def get_with_url(url):
 
 @receiver(post_save, sender=Note)
 def note_dispatch(sender, instance, created, **kwargs):
-    if not instance.tombstone and instance.ready and instance.local_actor:
+    if not instance.tombstone and instance.federate and instance.local_actor:
         def process_note():
             send_create_note_to_followers(instance)
-            instance.ready = False
-            instance.save(update_fields=["ready"])
+            instance.federate = False
+            instance.save(update_fields=["federate"])
         transaction.on_commit(process_note)
 
 @receiver(post_save, sender=ImageAttachment)
