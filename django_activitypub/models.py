@@ -115,7 +115,7 @@ class LocalActor(models.Model):
                 'owner': self.actor.get_absolute_url(),
                 'publicKeyPem': self.actor.public_key
             },
-            'attributionDomains': f'https://{self.actor.domain}',
+            'attributionDomains': [self.actor.domain],
             'attachment': [{
                 'type': 'PropertyValue',
                 'name': 'Website',
