@@ -338,7 +338,7 @@ class Note(TreeNode):
         ]
 
     def __str__(self):
-        return self.get_absolute_url()
+        return f'{self.content_url}?id={self.content_id}'
 
     def get_absolute_url(self):
         if self.local_actor:
@@ -358,7 +358,7 @@ class Note(TreeNode):
         object = {
             'id': self.get_absolute_url(), # TODO: handle remote & local content_url
             'type': 'Note',
-            'url': self.content_url + f'?id={self.content_id}',
+            'url': f'{self.content_url}?id={self.content_id}',
             'summary': None,
             'published': format_datetime(published),
             'attributedTo': self.actor.get_absolute_url(),
