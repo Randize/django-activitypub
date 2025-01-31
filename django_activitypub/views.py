@@ -6,7 +6,7 @@ import urllib.parse
 from xml.etree.ElementTree import Element, SubElement, tostring
 from xml.dom.minidom import parseString
 
-from django.http import JsonResponse, HttpResponse
+from django.http import JsonResponse, HttpResponse, Http404
 from django.shortcuts import get_object_or_404
 from django.urls import reverse, resolve
 from django.core.paginator import Paginator
@@ -394,7 +394,10 @@ def inbox(request, username):
                 if activity['object'].startswith(base_url):
                     note = get_with_url(activity['object'])
                 else:
-                    note = get_object_or_404(Note, content_url=activity['object'])
+                    try:
+                        note = get_object_or_404(Note, content_url=activity['object'])
+                    except Http404:
+                        pass
             if not note:
                 return JsonResponse({'error': f'like object is not a note: {activity["object"]}'}, status=400)
 
@@ -409,7 +412,10 @@ def inbox(request, username):
                 if activity['object'].startswith(base_url):
                     note = get_with_url(activity['object'])
                 else:
-                    note = get_object_or_404(Note, content_url=activity['object'])
+                    try:
+                        note = get_object_or_404(Note, content_url=activity['object'])
+                    except Http404:
+                        pass
             if not note:
                 return JsonResponse({'error': f'announce object is not a note: {activity["object"]}'}, status=400)
 
@@ -443,7 +449,10 @@ def inbox(request, username):
                 if to_undo['object'].startswith(base_url):
                     note = get_with_url(to_undo['object'])
                 else:
-                    note = get_object_or_404(Note, content_url=to_undo['object'])
+                    try:
+                        note = get_object_or_404(Note, content_url=activity['object'])
+                    except Http404:
+                        pass
                 if not note:
                     return JsonResponse({'error': f'undo like object is not a note: {to_undo["object"]}'}, status=400)
 
@@ -456,7 +465,10 @@ def inbox(request, username):
                 if to_undo['object'].startswith(base_url):
                     note = get_with_url(to_undo['object'])
                 else:
-                    note = get_object_or_404(Note, content_url=to_undo['object'])
+                    try:
+                        note = get_object_or_404(Note, content_url=activity['object'])
+                    except Http404:
+                        pass
                 if not note:
                     return JsonResponse({'error': f'undo announce object is not a note: {to_undo["object"]}'}, status=400)
 
