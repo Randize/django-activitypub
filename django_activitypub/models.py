@@ -110,6 +110,8 @@ class LocalActor(models.Model):
             'indexable': True, # default False - Makes posts searchable or not
             'published': '2025-01-01T00:00:00Z',
             'devices': None,
+            'matrixUserId': None,
+            'source': {},
             'publicKey': {
                 'id': f'{self.get_absolute_url()}#main-key',
                 'owner': self.get_absolute_url(),
