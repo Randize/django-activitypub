@@ -177,7 +177,7 @@ def profile(request, username):
 
     url_pattern = re.compile(r'(https?://www\.|https?://)([^\s]+?\.[^\s]+?\b)')
     domain = url_pattern.findall(request.headers.get("User-Agent", '')) or url_pattern.findall(request.headers.get("Signature", ''))
-    if type(domain) is list:
+    if type(domain) is list and len(domain) > 2:
         data['featuredTags'] = list(parse_hashtags('#IndieComics #Gamer #DigitalArt #ArtistOnMastodon', domain[1]))
 
     return JsonResponse(data, content_type="application/activity+json")
