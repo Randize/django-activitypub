@@ -258,9 +258,9 @@ def remote_redirect(request):
                     remote_actor = RemoteActor.objects.get_or_create_with_username_domain(username, domain)
                     parse = urllib.parse.urlparse(remote_actor.get_absolute_url())
                     return JsonResponse({'redirect': f'{parse.scheme}://{parse.netloc}/@{actor.handle}'}, content_type="application/activity+json")
-            return JsonResponse({}, status=405)
         except Exception as e:
-            return JsonResponse({'error': str(e), 'attributed': request.POST.get('attributed', ''), 'handle': request.POST.get('handle', '')}, status=500)
+            return JsonResponse({'error': str(e),'body': json.loads(request.body) , 'attributed': request.POST.get('attributed', ''), 'handle': request.POST.get('handle', '')}, status=500)
+    return JsonResponse({}, status=405)
 
 def followers(request, username):
     try:
