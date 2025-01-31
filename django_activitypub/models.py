@@ -100,7 +100,7 @@ class LocalActor(models.Model):
             'inbox': f'https://{self.domain}' + reverse('activitypub-inbox', kwargs={'username': self.preferred_username}),
             'outbox': f'https://{self.domain}' + reverse('activitypub-outbox', kwargs={'username': self.preferred_username}),
             'featured': None,
-            'featuredTags': None,
+            'featuredTags': [], 
             'name': self.name,
             'preferredUsername': self.preferred_username,
             'summary': mark_safe(self.summary),

@@ -11,7 +11,7 @@ from django.shortcuts import get_object_or_404
 from django.urls import reverse, resolve
 from django.core.paginator import Paginator
 from django.views.decorators.csrf import csrf_exempt
-from django_activitypub.models import ActorChoices, LocalActor, RemoteActor, Follower, Following, Note, get_with_url
+from django_activitypub.models import ActorChoices, LocalActor, RemoteActor, Follower, Following, Note, get_with_url, parse_hashtags
 from django_activitypub.signed_requests import signed_post, SignatureChecker
 from django_activitypub.webfinger import fetch_remote_profile, WebfingerException
 from django.utils.safestring import mark_safe
@@ -174,6 +174,11 @@ def profile(request, username):
         ]
     }
     data.update(actor.as_json())
+
+    domain = request.META.get('HTTP_HOST', None)
+    if domain:
+        data['featuredTags'] = list(parse_hashtags('#IndieComics #Gamer #DigitalArt #ArtistOnMastodon', domain))
+
     return JsonResponse(data, content_type="application/activity+json")
 
 
