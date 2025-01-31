@@ -260,7 +260,7 @@ def remote_redirect(request):
                     return JsonResponse({'redirect': f'{parse.scheme}://{parse.netloc}/@{actor.handle}'}, content_type="application/activity+json")
             return JsonResponse({}, status=405)
         except Exception as e:
-            return JsonResponse({'error': str(e)}, status=500)
+            return JsonResponse({'error': str(e), 'debug': request.POST}, status=500)
 
 def followers(request, username):
     try:
