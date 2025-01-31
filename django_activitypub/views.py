@@ -173,7 +173,7 @@ def profile(request, username):
             "https://join-lemmy.org/context.json",
         ]
     }
-    data.upate(actor.as_json())
+    data.update(actor.as_json())
     return JsonResponse(data, content_type="application/activity+json")
 
 
