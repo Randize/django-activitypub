@@ -383,7 +383,7 @@ def inbox(request, username):
             response['ok'] = True
 
         elif activity['type'] == 'Like':
-            if activity['object'].startswith(base_url):
+            if type(activity['object']) is not dict and activity['object'].startswith(base_url):
                 note = get_with_url(activity['object'])
             else:
                 note = get_object_or_404(Note, content_url=activity['object'])
@@ -396,7 +396,7 @@ def inbox(request, username):
             response['ok'] = True
 
         elif activity['type'] == 'Announce':
-            if activity['object'].startswith(base_url):
+            if type(activity['object']) is not dict and activity['object'].startswith(base_url):
                 note = get_with_url(activity['object'])
             else:
                 note = get_object_or_404(Note, content_url=activity['object'])
