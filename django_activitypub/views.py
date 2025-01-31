@@ -246,18 +246,21 @@ def notes(request, username, id, mode = 'statuses'):
 @csrf_exempt
 def remote_redirect(request):
     if request.method == "POST":
-        actor = LocalActor.objects.get(preferred_username=request.POST.get('attributed', ''))
-        handle = request.POST.get('handle', '')
-        handle_pattern = re.compile(r'\b(?P<username>[a-zA-Z0-9-]+)@(?P<domain>[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})\b')
-        if handle:
-            handle_m = handle_pattern.match(handle)
-            if handle_m:
-                username = handle_m.group('username')
-                domain = handle_m.group('domain')
-                remote_actor = RemoteActor.objects.get_or_create_with_username_domain(username, domain)
-                parse = urllib.parse.urlparse(remote_actor.get_absolute_url())
-                return JsonResponse({'redirect': f'{parse.scheme}://{parse.netloc}/@{actor.handle}'}, content_type="application/activity+json")
-        return JsonResponse({}, status=405)
+        try:
+            actor = LocalActor.objects.get(preferred_username=request.POST.get('attributed', ''))
+            handle = request.POST.get('handle', '')
+            handle_pattern = re.compile(r'\b(?P<username>[a-zA-Z0-9-]+)@(?P<domain>[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})\b')
+            if handle:
+                handle_m = handle_pattern.match(handle)
+                if handle_m:
+                    username = handle_m.group('username')
+                    domain = handle_m.group('domain')
+                    remote_actor = RemoteActor.objects.get_or_create_with_username_domain(username, domain)
+                    parse = urllib.parse.urlparse(remote_actor.get_absolute_url())
+                    return JsonResponse({'redirect': f'{parse.scheme}://{parse.netloc}/@{actor.handle}'}, content_type="application/activity+json")
+            return JsonResponse({}, status=405)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
 
 def followers(request, username):
     try:
