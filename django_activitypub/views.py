@@ -242,9 +242,21 @@ def notes(request, username, id, mode = 'statuses'):
                 return JsonResponse({'error': f'invalid page number {page_num}'}, status=404)
     return JsonResponse(data, content_type="application/activity+json")
 
+pass # TODO: Redirect remote users to their server | input activitypub actor id > webfinger the user profile > redirect to user page
 def remote_redirect(request):
-    handle_pattern = re.compile(r'\b[a-zA-Z0-9-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\b')
-    pass # TODO: Redirect remote users to their server | input activitypub actor id > webfinger the user profile > redirect to user page
+    if request.method == "POST":
+        actor = LocalActor.objects.get(preferred_username=request.POST.get('attributed', ''))
+        handle = request.POST.get('handle', '')
+        handle_pattern = re.compile(r'\b([a-zA-Z0-9-]+)@([a-zA-Z0-9.-]+\.[a-zA-Z]{2,})\b')
+        if handle:
+            handle_m = handle_pattern.match(handle)
+            if handle_m:
+                username = handle_m.group('username')
+                domain = handle_m.group('domain')
+                remote_actor = RemoteActor.objects.get_or_create_with_username_domain(username. domain)
+                parse = urllib.parse.urlparse(remote_actor.get_absolute_url())
+                return JsonResponse({'redirect': f'{parse.scheme}://{parse.netloc}/@{actor.handle}'}, content_type="application/activity+json")
+        return JsonResponse({}, status=405)
 
 def followers(request, username):
     try:
