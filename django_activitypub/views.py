@@ -175,6 +175,7 @@ def profile(request, username):
     }
     data.update(actor.as_json())
 
+    # TODO: featuredTags is in collection pagination
     url_pattern = re.compile(r'(https?://www\.|https?://)([^\s]+?\.[^\s]+?\b)')
     domain = url_pattern.findall(request.headers.get("User-Agent", '')) or url_pattern.findall(request.headers.get("Signature", ''))
     if domain and type(domain) is list and type(domain[0]) is tuple and len(domain[0]) > 1:
