@@ -94,7 +94,7 @@ class LocalActor(models.Model):
     def as_json(self):
         object = {
             'id': f'https://{self.domain}' + reverse('activitypub-profile', kwargs={'username': self.preferred_username}),
-            'type': 'Person',
+            'type': ActorChoices(self.actor_type).label,
             'following': f'https://{self.domain}' + reverse('activitypub-following', kwargs={'username': self.preferred_username}),
             'followers': f'https://{self.domain}' + reverse('activitypub-followers', kwargs={'username': self.preferred_username}),
             'inbox': f'https://{self.domain}' + reverse('activitypub-inbox', kwargs={'username': self.preferred_username}),
@@ -103,7 +103,7 @@ class LocalActor(models.Model):
             'featuredTags': None,
             'name': self.name,
             'preferredUsername': self.preferred_username,
-            'summary': self.summary,
+            'summary': mark_safe(self.summary),
             'url': f'https://{self.domain}' + reverse('activitypub-profile-short', kwargs={'username': self.preferred_username}),
             'manuallyApprovesFollowers': False,
             'discoverable': True,

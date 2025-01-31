@@ -170,49 +170,10 @@ def profile(request, username):
         '@context': [
             'https://www.w3.org/ns/activitystreams',
             'https://w3id.org/security/v1',
-        ],
-        'type': ActorChoices(actor.actor_type).label,
-        'discoverable': True,
-        'manuallyApprovesFollowers': False,
-        'preferredUsername': actor.preferred_username,
-        'indexable': True, # default False - Makes posts searchable or not
-        'name': actor.name,
-        'summary': mark_safe(actor.summary),
-        'url': request.build_absolute_uri(reverse('activitypub-profile-short', kwargs={'username': actor.preferred_username})),
-        'id': request.build_absolute_uri(reverse('activitypub-profile', kwargs={'username': actor.preferred_username})),
-        'followers': request.build_absolute_uri(reverse('activitypub-followers', kwargs={'username': actor.preferred_username})),
-        'following': request.build_absolute_uri(reverse('activitypub-following', kwargs={'username': actor.preferred_username})),
-        'inbox': request.build_absolute_uri(reverse('activitypub-inbox', kwargs={'username': actor.preferred_username})),
-        'outbox': request.build_absolute_uri(reverse('activitypub-outbox', kwargs={'username': actor.preferred_username})),
-        'publicKey': {
-            'id': request.build_absolute_uri(reverse('activitypub-profile', kwargs={'username': actor.preferred_username})) + '#main-key',
-            'owner': request.build_absolute_uri(reverse('activitypub-profile', kwargs={'username': actor.preferred_username})),
-            'publicKeyPem': actor.public_key,
-        },
-        'attributionDomains': [request.get_host()],
-        'attachment': [{
-            'type':'PropertyValue',
-            'name':'Website',
-            'value':'<a href="https://{}" translate="no"><span class="">{}</span><span class="invisible"></span></a>'.format('https://' + request.get_host(), request.get_host())
-        }],
+            "https://join-lemmy.org/context.json",
+        ]
     }
-    if actor.icon:
-        data['icon'] = {
-            'type': 'Image',
-            'mediaType': 'image/jpeg',  # todo make this dynamic
-            'url': request.build_absolute_uri(actor.icon.url),
-            'sensitive': False,
-            'name': None,
-        }
-    if actor.image:
-        data['image'] = {
-            'type': 'Image',
-            'mediaType': 'image/jpeg',  # todo make this dynamic
-            'url': request.build_absolute_uri(actor.image.url),
-            'sensitive': False,
-            'name': None,
-        }
-
+    data.upate(actor.as_json())
     return JsonResponse(data, content_type="application/activity+json")
 
 
