@@ -178,8 +178,8 @@ def profile(request, username):
     url_pattern = re.compile(r'(https?://www\.|https?://)([^\s]+?\.[^\s]+?\b)')
     domain = url_pattern.findall(request.headers.get("User-Agent", '')) or url_pattern.findall(request.headers.get("Signature", ''))
     data['debug'] = domain
-    if domain and type(domain) is list and type(domain[0]) is tuple and len(domain[0]) > 1:
-        data['featuredTags'] = list(parse_hashtags('#IndieComics #Gamer #DigitalArt #ArtistOnMastodon', domain[1]))
+    # if domain and type(domain) is list and type(domain[0]) is tuple and len(domain[0]) > 1:
+    #     data['featuredTags'] = list(parse_hashtags('#IndieComics #Gamer #DigitalArt #ArtistOnMastodon', domain[1]))
 
     return JsonResponse(data, content_type="application/activity+json")
 
