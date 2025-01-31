@@ -111,6 +111,9 @@ class LocalActor(models.Model):
             'published': '2025-01-01T00:00:00Z',
             'devices': None,
             'matrixUserId': None,
+            'alsoKnownAs': [
+                'https://pixelfed.social/i/web/profile/784203793153687513',
+            ],
             'source': {},
             'publicKey': {
                 'id': f'{self.get_absolute_url()}#main-key',
