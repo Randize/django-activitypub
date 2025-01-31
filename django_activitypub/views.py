@@ -248,7 +248,7 @@ def remote_redirect(request):
     if request.method == "POST":
         actor = LocalActor.objects.get(preferred_username=request.POST.get('attributed', ''))
         handle = request.POST.get('handle', '')
-        handle_pattern = re.compile(r'\b([a-zA-Z0-9-]+)@([a-zA-Z0-9.-]+\.[a-zA-Z]{2,})\b')
+        handle_pattern = re.compile(r'\b(?P<username>[a-zA-Z0-9-]+)@(?P<domain>[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})\b')
         if handle:
             handle_m = handle_pattern.match(handle)
             if handle_m:
