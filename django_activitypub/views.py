@@ -175,7 +175,7 @@ def profile(request, username):
     }
     data.update(actor.as_json())
 
-    domain = request.META.get('HTTP_HOST', None)
+    domain = request.META.get('HTTP_ORIGIN', None)
     if domain:
         data['featuredTags'] = list(parse_hashtags('#IndieComics #Gamer #DigitalArt #ArtistOnMastodon', domain))
 
