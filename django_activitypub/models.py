@@ -648,6 +648,7 @@ def send_old_notes(local_actor, remote_actor):
             "https://w3id.org/security/v1"
         ],
     }
+    # TODO: Filter out m2m in followers that's not added yet - total followers != added followers
     notes = Note.objects.order_by('-published_at').filter(local_actor=local_actor)
     for note in notes:
         data.update(note.as_json(mode='update', base_url=f'https://{domain}'))
