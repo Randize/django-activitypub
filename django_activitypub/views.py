@@ -243,7 +243,6 @@ def notes(request, username, id, mode = 'statuses'):
                 return JsonResponse({'error': f'invalid page number {page_num}'}, status=404)
     return JsonResponse(data, content_type="application/activity+json")
 
-pass # TODO: Redirect remote users to their server | input activitypub actor id > webfinger the user profile > redirect to user page
 def remote_redirect(request):
     if request.method == "POST":
         actor = LocalActor.objects.get(preferred_username=request.POST.get('attributed', ''))
