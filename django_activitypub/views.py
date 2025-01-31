@@ -176,7 +176,7 @@ def profile(request, username):
     data.update(actor.as_json())
 
     url_pattern = re.compile(r'(https?://www\.|https?://)([^\s]+?\.[^\s]+?\b)')
-    domain = url_pattern.findall(request.headers.get("User-Agent")) or url_pattern.findall(request.headers.get("Signature"))
+    domain = url_pattern.findall(request.headers.get("User-Agent", '')) or url_pattern.findall(request.headers.get("Signature", ''))
     if type(domain) is list:
         data['featuredTags'] = list(parse_hashtags('#IndieComics #Gamer #DigitalArt #ArtistOnMastodon', domain[1]))
 
