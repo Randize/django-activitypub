@@ -242,6 +242,10 @@ def notes(request, username, id, mode = 'statuses'):
                 return JsonResponse({'error': f'invalid page number {page_num}'}, status=404)
     return JsonResponse(data, content_type="application/activity+json")
 
+def remote_redirect(request):
+    handle_pattern = re.compile(r'\b[a-zA-Z0-9-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\b')
+    pass # TODO: Redirect remote users to their server | input activitypub actor id > webfinger the user profile > redirect to user page
+
 def followers(request, username):
     try:
         actor = LocalActor.objects.get(preferred_username=username)
