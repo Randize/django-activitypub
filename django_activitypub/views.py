@@ -259,8 +259,8 @@ def remote_redirect(request):
                     parse = urllib.parse.urlparse(remote_actor.get_absolute_url())
                     return JsonResponse({'redirect': f'{parse.scheme}://{parse.netloc}/@{actor.handle}'}, content_type="application/activity+json")
         except Exception as e:
-            with open('/var/www/static/debug.html', 'w') as f:
-                f.write(request.body.decode('utf-8'))
+            # with open('/var/www/static/debug.html', 'w') as f:
+            #     f.write(request.body.decode('utf-8'))
             return JsonResponse({'error': str(e), 'attributed': request.POST.get('attributed', ''), 'handle': request.POST.get('handle', '')}, status=500)
     return JsonResponse({}, status=405)
 
