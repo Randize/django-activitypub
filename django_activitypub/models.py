@@ -304,19 +304,22 @@ class NoteManager(TreeQuerySet):
             note = self.get(content_url=full_obj['id'])
         except Note.DoesNotExist:
             note = Note()
-        note.remote_actor = RemoteActor.objects.get_or_create_with_url(full_obj['attributedTo'])
-        note.published_at = parse_datetime(full_obj['published'])
-        if updated_str := full_obj.get('updated', None):
-            note.updated_at = parse_datetime(updated_str)
-        note.content = full_obj['content']
-        note.content_url = obj['id']
-        if reply_url := full_obj.get('inReplyTo', None):
-            if reply_url.startswith(base_url):
-                note.parent = get_with_url(reply_url)
-            else:
-                note.parent = Note.objects.upsert_remote(base_url, get_object(reply_url))
-        note.save()
-        return note
+        # only add to db if note is related to the site
+        if note.ancestors() and [n for n in note.ancestors() if n.get_absolute_url().startswith(base_url)]:
+            note.remote_actor = RemoteActor.objects.get_or_create_with_url(full_obj['attributedTo'])
+            note.published_at = parse_datetime(full_obj['published'])
+            if updated_str := full_obj.get('updated', None):
+                note.updated_at = parse_datetime(updated_str)
+            note.content = full_obj['content']
+            note.content_url = obj['id']
+            if reply_url := full_obj.get('inReplyTo', None):
+                if reply_url.startswith(base_url):
+                    note.parent = get_with_url(reply_url)
+                else:
+                    note.parent = Note.objects.upsert_remote(base_url, get_object(reply_url))
+            note.save()
+        if note.id:
+            return note
     
 
 class Note(TreeNode):
