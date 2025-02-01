@@ -428,6 +428,7 @@ def inbox(request, username):
             if activity['object']['id'].startswith(base_url):
                 pass  # there is nothing to do, this is our note
             else:
+                # TODO: only record in db if the notes are replies
                 Note.objects.upsert_remote(base_url, activity['object'])
             response['ok'] = True
 
