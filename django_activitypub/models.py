@@ -305,7 +305,7 @@ class NoteManager(TreeQuerySet):
         except Note.DoesNotExist:
             note = Note()
         # only add to db if note is related to the site
-        if note.ancestors() and [n for n in note.ancestors() if n.get_absolute_url().startswith(base_url)]:
+        if note and note.ancestors() and [n for n in note.ancestors() if n.get_absolute_url().startswith(base_url)]:
             note.remote_actor = RemoteActor.objects.get_or_create_with_url(full_obj['attributedTo'])
             note.published_at = parse_datetime(full_obj['published'])
             if updated_str := full_obj.get('updated', None):
