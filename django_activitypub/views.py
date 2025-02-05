@@ -195,19 +195,17 @@ def notes(request, username, id, mode = 'statuses'):
     elif mode == 'activity':
         data.update(note.as_json(mode='activity'))
     elif mode == 'likes':
-        data = {
-            "@context": "https://www.w3.org/ns/activitystreams",
+        data.update({
             "id": request.build_absolute_uri(reverse('activitypub-notes-likes', kwargs={'username': username, 'id': id})),
             "type": "Collection",
             "totalItems": note.likes.count()
-        }
+        })
     elif mode == 'shares':
-        data = {
-            "@context": "https://www.w3.org/ns/activitystreams",
+        data.update({
             'id': request.build_absolute_uri(reverse('activitypub-notes-shares', kwargs={'username': username, 'id': id})),
             'type': 'Collection',
             'totalItems': note.announces.count()
-        }
+        })
     elif mode == 'delete':
         data = {}
     elif mode == 'replies':
@@ -215,11 +213,10 @@ def notes(request, username, id, mode = 'statuses'):
         paginator = Paginator(query, 10)
         page_num_arg = request.GET.get('page', None)
         replies_url = request.build_absolute_uri(reverse('activitypub-notes-replies', kwargs={'username': username, 'id': id}))
-        data = {
-            '@context': 'https://www.w3.org/ns/activitystreams',
+        data.update({
             'id': replies_url,
             'type': 'Collection',
-        }
+        })
 
         if page_num_arg is None:
             data['first'] = {
