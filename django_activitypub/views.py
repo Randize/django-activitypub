@@ -1,6 +1,6 @@
 import json
 import re
-import uuid
+import uuid, requests
 from urllib.parse import urlencode, urlparse
 
 from xml.etree.ElementTree import Element, SubElement, tostring
@@ -241,8 +241,40 @@ def notes(request, username, id, mode = 'statuses'):
                 return JsonResponse({'error': f'invalid page number {page_num}'}, status=404)
     return JsonResponse(data, content_type="application/activity+json")
 
+
+def remote_subscribe_redirect(request, domain, username):
+    webfinger_url = f"https://{domain}/.well-known/webfinger"
+    resource = f"acct:{username}@{domain}"
+
+    params = {'resource': resource}
+
+    try:
+        # Request WebFinger data
+        response = requests.get(webfinger_url, params=params, timeout=5)
+        response.raise_for_status()  # Raise error for non-200 responses
+        data = response.json()
+
+        # Find the "subscribe" URL template
+        subscribe_template = None
+        for link in data.get('links', []):
+            if link.get('rel') == "http://ostatus.org/schema/1.0/subscribe":
+                subscribe_template = link.get('template')
+                break
+
+        if not subscribe_template:
+            return JsonResponse({'error': 'Subscribe template not found'}, status=404)
+
+        # Format the subscribe URL for the given user
+        subscribe_url = subscribe_template.replace('{uri}', resource)
+
+        return JsonResponse({'subscribe_url': subscribe_url})
+
+    except requests.RequestException as e:
+        return JsonResponse({'error': str(e)}, status=500)
+    
+
 @csrf_exempt
-def remote_redirect(request):
+def remote_handle_redirect(request):
     if request.method == "POST":
         try:
             actor = LocalActor.objects.get(preferred_username=request.POST.get('attributed', ''))
