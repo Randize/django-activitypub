@@ -185,14 +185,15 @@ def profile(request, username):
 
 
 def notes(request, username, id, mode = 'statuses'):
+    data = {"@context": "https://www.w3.org/ns/activitystreams"}
     try:
         note = Note.objects.get(content_id=id)
     except:
         return JsonResponse({'error': 'Not Found'}, status=404)
     if mode == 'statuses':
-        data = note.as_json(mode='statuses')
+        data.update(note.as_json(mode='statuses'))
     elif mode == 'activity':
-        data = note.as_json(mode='activity')
+        data.update(note.as_json(mode='activity'))
     elif mode == 'likes':
         data = {
             "@context": "https://www.w3.org/ns/activitystreams",
