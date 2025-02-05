@@ -242,12 +242,13 @@ def notes(request, username, id, mode = 'statuses'):
     return JsonResponse(data, content_type="application/activity+json")
 
 
-def remote_subscribe_redirect(request, username, domain):
+def remote_redirect(request, username, domain):
     webfinger_url = f"https://{domain}/.well-known/webfinger"
     resource = f"acct:{username}@{domain}"
-
+    uri = f"@{username}@{domain}"
     params = {'resource': resource}
 
+    uri = urlencode(request.GET.get('uri', uri))
     try:
         # Request WebFinger data
         response = requests.get(webfinger_url, params=params, timeout=5)
@@ -260,14 +261,13 @@ def remote_subscribe_redirect(request, username, domain):
             if link.get('rel') == "http://ostatus.org/schema/1.0/subscribe":
                 subscribe_template = link.get('template')
                 break
-
         if not subscribe_template:
             return JsonResponse({'error': 'Subscribe template not found'}, status=404)
 
         # Format the subscribe URL for the given user
-        subscribe_url = subscribe_template.replace('{uri}', resource)
+        subscribe_url = subscribe_template.replace('{uri}', uri)
 
-        return JsonResponse({'subscribe_url': subscribe_url})
+        return JsonResponse({'url': subscribe_url})
 
     except requests.RequestException as e:
         return JsonResponse({'error': str(e)}, status=500)
