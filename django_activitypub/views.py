@@ -248,7 +248,8 @@ def remote_redirect(request, username, domain):
     uri = f"@{username}@{domain}"
     params = {'resource': resource}
 
-    uri = urlencode(request.GET.get('uri', uri))
+    if request.GET.get('uri'):
+        uri = urlencode(request.GET.get('uri'))
     try:
         # Request WebFinger data
         response = requests.get(webfinger_url, params=params, timeout=5)
