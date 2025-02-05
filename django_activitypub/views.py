@@ -483,7 +483,7 @@ def inbox(request, username):
                     try:
                         note = get_object_or_404(Note, content_url=activity['object'])
                     except Http404:
-                        pass
+                        note = None
                 if not note:
                     return JsonResponse({'error': f'undo like object is not a note: {to_undo["object"]}'}, status=400)
 
@@ -499,7 +499,7 @@ def inbox(request, username):
                     try:
                         note = get_object_or_404(Note, content_url=activity['object'])
                     except Http404:
-                        pass
+                        note = None
                 if not note:
                     return JsonResponse({'error': f'undo announce object is not a note: {to_undo["object"]}'}, status=400)
 
