@@ -1,7 +1,7 @@
 import json
 import re
 import uuid, requests
-from urllib.parse import urlencode, urlparse
+from urllib.parse import quote, urlparse
 
 from xml.etree.ElementTree import Element, SubElement, tostring
 from xml.dom.minidom import parseString
@@ -248,10 +248,7 @@ def remote_redirect(request, username, domain):
     handle = f"@{username}@{domain}"
     params = {'resource': resource}
 
-    if request.GET.get('uri'):
-        uri = urlencode(request.GET.get('uri'))
-    else:
-        uri = handle
+    uri = quote(request.GET.get('uri'), handle)
     try:
         # Request WebFinger data
         response = requests.get(webfinger_url, params=params, timeout=5)
