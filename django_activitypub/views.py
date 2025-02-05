@@ -242,7 +242,7 @@ def notes(request, username, id, mode = 'statuses'):
     return JsonResponse(data, content_type="application/activity+json")
 
 
-def remote_subscribe_redirect(request, domain, username):
+def remote_subscribe_redirect(request, username, domain):
     webfinger_url = f"https://{domain}/.well-known/webfinger"
     resource = f"acct:{username}@{domain}"
 
