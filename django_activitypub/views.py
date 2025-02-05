@@ -245,11 +245,13 @@ def notes(request, username, id, mode = 'statuses'):
 def remote_redirect(request, username, domain):
     webfinger_url = f"https://{domain}/.well-known/webfinger"
     resource = f"acct:{username}@{domain}"
-    uri = f"@{username}@{domain}"
+    handle = f"@{username}@{domain}"
     params = {'resource': resource}
 
     if request.GET.get('uri'):
         uri = urlencode(request.GET.get('uri'))
+    else:
+        uri = handle
     try:
         # Request WebFinger data
         response = requests.get(webfinger_url, params=params, timeout=5)
