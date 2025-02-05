@@ -1,7 +1,7 @@
 import json
 import re
 import uuid
-import urllib.parse
+from urllib.parse import urlencode, urlparse
 
 from xml.etree.ElementTree import Element, SubElement, tostring
 from xml.dom.minidom import parseString
@@ -24,7 +24,7 @@ def webfinger(request):
         username = acct_m.group('username')
         domain = acct_m.group('domain')
     elif resource.startswith('http'):
-        parsed = urllib.parse.urlparse(resource)
+        parsed = urlparse(resource)
         if parsed.scheme != request.scheme or parsed.netloc != request.get_host():
             return JsonResponse({'error': 'invalid resource'}, status=404)
         url = resolve(parsed.path)
@@ -254,7 +254,7 @@ def remote_redirect(request):
                     username = handle_m.group('username')
                     domain = handle_m.group('domain')
                     remote_actor = RemoteActor.objects.get_or_create_with_username_domain(username, domain)
-                    parse = urllib.parse.urlparse(remote_actor.get_absolute_url())
+                    parse = urlparse(remote_actor.get_absolute_url())
                     return JsonResponse({'redirect': f'{parse.scheme}://{parse.netloc}/@{actor.handle}'}, content_type="application/activity+json")
         except Exception as e:
             # with open('/var/www/static/debug.html', 'w') as f:
