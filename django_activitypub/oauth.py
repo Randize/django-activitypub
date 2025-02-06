@@ -7,6 +7,7 @@ from django.conf import settings
 
 from urllib.parse import urljoin
 from oauth2_provider.models import Application, AccessToken
+from oauth2_provider.generators import generate_client_id, generate_client_secret
 from oauth2_provider.views import AuthorizationView
 
 import json, secrets
@@ -63,8 +64,8 @@ def register_oauth_client(request):
             return JsonResponse({'error': 'client_name and redirect_uris are required'}, status=400)
 
         # Generate client_id and client_secret
-        client_id = secrets.token_urlsafe(32)
-        client_secret = secrets.token_urlsafe(48)
+        client_id = generate_client_id()
+        client_secret = generate_client_secret()
 
         # Create the application in Django OAuth Toolkit
         application = Application.objects.create(
@@ -83,7 +84,6 @@ def register_oauth_client(request):
             "redirect_uris": application.redirect_uris,
             "client_id": client_id,
             "client_secret": client_secret,
-            "vapid_key": secrets.token_urlsafe(64)  # Dummy VAPID key for Mastodon compatibility
         }
         return JsonResponse(response)
 
