@@ -53,16 +53,14 @@ def register_oauth_client(request):
         return JsonResponse({"error": "Invalid JSON"}, status=400)
 
     try:
+        redirect_uris = []
+        redirect_uris.append(data.get('redirect_uris'))
         client_name = data.get('client_name')
-        redirect_uris = data.get('redirect_uris')
         scopes = data.get('scopes', 'read')
         website = data.get('website', '')
 
         if not client_name or not redirect_uris:
             return JsonResponse({'error': 'client_name and redirect_uris are required'}, status=400)
-
-        if type(redirect_uris) is list:
-            redirect_uris = " ".join(redirect_uris)  # Convert list to space-separated string
 
         # Generate client_id and client_secret
         client_id = secrets.token_urlsafe(32)
@@ -71,7 +69,7 @@ def register_oauth_client(request):
         # Create the application in Django OAuth Toolkit
         application = Application.objects.create(
             name=client_name,
-            redirect_uris=redirect_uris,
+            redirect_uris=" ".join(redirect_uris),
             client_type=Application.CLIENT_CONFIDENTIAL,
             authorization_grant_type=Application.GRANT_AUTHORIZATION_CODE,
             user=None  # Optional: Assign a user if required
@@ -82,8 +80,7 @@ def register_oauth_client(request):
             "name": application.name,
             "website": website,
             "scopes": scopes.split(' '),
-            "redirect_uri": application.redirect_uris,
-            "redirect_uris": list(application.redirect_uris),
+            "redirect_uris": application.redirect_uris,
             "client_id": client_id,
             "client_secret": client_secret,
             "vapid_key": secrets.token_urlsafe(64)  # Dummy VAPID key for Mastodon compatibility
