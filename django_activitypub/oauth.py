@@ -2,10 +2,11 @@ from django.http import JsonResponse
 from django.contrib.auth.models import User
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.models import AnonymousUser
+from django.utils import timezone
 from django.conf import settings
 
 from urllib.parse import urljoin
-from oauth2_provider.models import Application
+from oauth2_provider.models import Application, AccessToken
 from oauth2_provider.views import AuthorizationView
 
 import json, secrets
@@ -96,5 +97,24 @@ def register_oauth_client(request):
 class CustomAuthorizationView(AuthorizationView):
     def dispatch(self, request, *args, **kwargs):
         if request.user.is_anonymous:
-            request.user = AnonymousUser()  # Allow anonymous users to authorize
+            # Find the application by client_id
+            client_id = request.GET.get("client_id")
+            app = Application.objects.get(client_id=client_id)
+
+            # Generate an access token
+            token = AccessToken.objects.create(
+                user=None,  # No user required
+                application=app,
+                token=secrets.token_urlsafe(32),
+                expires=timezone.now() + timezone.timedelta(days=1),
+                scope="read write follow profile",
+            )
+
+            return JsonResponse({
+                "access_token": token.token,
+                "token_type": "Bearer",
+                "expires_in": 86400,
+                "scope": token.scope,
+            })
+
         return super().dispatch(request, *args, **kwargs)
