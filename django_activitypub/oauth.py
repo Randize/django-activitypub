@@ -6,7 +6,7 @@ from django.conf import settings
 from urllib.parse import urljoin
 from oauth2_provider.models import Application
 
-import json
+import json, secrets
 
 def oauth_authorization_server(request):
     """
@@ -70,23 +70,38 @@ def register_oauth_client(request):
         return JsonResponse({"error": "Invalid request method"}, status=405)
 
     try:
-        data = json.loads(request.body)
-        user = User.objects.get(username=data["username"])  # Ensure user exists
+        client_name = request.data.get('client_name')
+        redirect_uris = request.data.get('redirect_uris')
+        scopes = request.data.get('scopes', 'read')
+        website = request.data.get('website', '')
 
-        app = Application.objects.create(
-            name=data.get("name", "New OAuth App"),
-            user=user,
-            client_type=data.get("client_type", "confidential"),
-            authorization_grant_type=data.get("grant_type", "authorization-code"),
-            redirect_uris=data.get("redirect_uri", ""),
+        if not client_name or not redirect_uris:
+            return JsonResponse({'error': 'client_name and redirect_uris are required'}, status=400)
+
+        # Generate client_id and client_secret
+        client_id = secrets.token_urlsafe(32)
+        client_secret = secrets.token_urlsafe(48)
+
+        # Create the application in Django OAuth Toolkit
+        application = Application.objects.create(
+            name=client_name,
+            redirect_uris=redirect_uris,
+            client_type=Application.CLIENT_CONFIDENTIAL,
+            authorization_grant_type=Application.GRANT_AUTHORIZATION_CODE,
+            user=None  # Optional: Assign a user if required
         )
 
-        return JsonResponse({
-            "client_id": app.client_id,
-            "client_secret": app.client_secret,
-            "redirect_uris": app.redirect_uris,
-            "grant_type": app.authorization_grant_type,
-        })
+        response = {
+            "id": application.id,
+            "name": application.name,
+            "website": website,
+            "scopes": scopes.split(' '),
+            "redirect_uri": application.redirect_uris,
+            "client_id": client_id,
+            "client_secret": client_secret,
+            "vapid_key": secrets.token_urlsafe(64)  # Dummy VAPID key for Mastodon compatibility
+        }
+        return JsonResponse(response)
 
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=400)
