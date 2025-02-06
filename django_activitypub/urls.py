@@ -27,5 +27,5 @@ urlpatterns = [
     path('pub/<slug:username>/inbox', inbox, name='activitypub-inbox'),
     path('pub/<slug:username>/outbox', outbox, name='activitypub-outbox'),
     path('.well-known/oauth-authorization-server', oauth_authorization_server, name='oauth_authorization_server'),
-    path('oauth/apps/', register_oauth_client, name="oauth_register"),
+    path('api/v1/apps', register_oauth_client, name="oauth_register"),
 ]
