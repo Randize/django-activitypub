@@ -20,7 +20,7 @@ def oauth_authorization_server(request):
         "service_documentation": None,
         "authorization_endpoint": oauth_url,
         "token_endpoint": urljoin(base_url, '/oauth/token/'),  # Allauth token endpoint
-        "app_registration_endpoint": urljoin(base_url, 'oauth/applications/'),
+        "app_registration_endpoint": urljoin(base_url, 'oauth/apps/'),
         "revocation_endpoint": urljoin(base_url, '/oauth/revoke_token/'),  # Optional
         "introspection_endpoint": urljoin(base_url, '/oauth/introspect/'),  # Optional
         "scopes_supported": [
