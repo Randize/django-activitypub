@@ -102,6 +102,7 @@ def register_oauth_client(request):
             "website": website,
             "scopes": scopes.split(' '),
             "redirect_uri": application.redirect_uris,
+            "redirect_uris": list(application.redirect_uris),
             "client_id": client_id,
             "client_secret": client_secret,
             "vapid_key": secrets.token_urlsafe(64)  # Dummy VAPID key for Mastodon compatibility
