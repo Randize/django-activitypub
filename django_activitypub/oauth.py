@@ -70,10 +70,15 @@ def register_oauth_client(request):
         return JsonResponse({"error": "Invalid request method"}, status=405)
 
     try:
-        client_name = request.data.get('client_name')
-        redirect_uris = request.data.get('redirect_uris')
-        scopes = request.data.get('scopes', 'read')
-        website = request.data.get('website', '')
+        data = json.loads(request.body.decode("utf-8"))  # Parse JSON request body
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON"}, status=400)
+
+    try:
+        client_name = data.get('client_name')
+        redirect_uris = data.get('redirect_uris')
+        scopes = data.get('scopes', 'read')
+        website = data.get('website', '')
 
         if not client_name or not redirect_uris:
             return JsonResponse({'error': 'client_name and redirect_uris are required'}, status=400)
