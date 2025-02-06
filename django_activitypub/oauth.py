@@ -81,14 +81,14 @@ def register_oauth_client(request):
             "name": application.name,
             "website": website,
             "scopes": scopes.split(' '),
-            "redirect_uris": application.redirect_uris,
+            "redirect_uris": redirect_uris,
             "client_id": client_id,
             "client_secret": client_secret,
         }
         return JsonResponse(response)
 
     except Exception as e:
-        return JsonResponse({"error": str(e)}, status=400)
+        return JsonResponse({"error": str(e), 'redirect_uris': redirect_uris}, status=400)
     
 
 class CustomAuthorizationView(AuthorizationView):
