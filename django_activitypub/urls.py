@@ -1,6 +1,6 @@
 from django.urls import path
-from django_activitypub.views import webfinger, profile, followers, inbox, outbox, hostmeta, nodeinfo, nodeinfo_links, notes, followings, remote_redirect, CustomAuthorizationView
-from django_activitypub.oauth import oauth_authorization_server, register_oauth_client
+from django_activitypub.views import webfinger, profile, followers, inbox, outbox, hostmeta, nodeinfo, nodeinfo_links, notes, followings, remote_redirect
+from django_activitypub.oauth import oauth_authorization_server, register_oauth_client, CustomAuthorizationView
 
 urlpatterns = [
     path('.well-known/webfinger', webfinger, name='activitypub-webfinger'),
