@@ -54,8 +54,7 @@ def register_oauth_client(request):
         return JsonResponse({"error": "Invalid JSON"}, status=400)
 
     try:
-        redirect_uris = []
-        redirect_uris.append(data.get('redirect_uris'))
+        redirect_uris = data.get('redirect_uris')
         client_name = data.get('client_name')
         scopes = data.get('scopes', 'read')
         website = data.get('website', '')
