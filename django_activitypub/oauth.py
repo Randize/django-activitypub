@@ -1,10 +1,12 @@
 from django.http import JsonResponse
 from django.contrib.auth.models import User
 from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.models import AnonymousUser
 from django.conf import settings
 
 from urllib.parse import urljoin
 from oauth2_provider.models import Application
+from oauth2_provider.views import AuthorizationView
 
 import json, secrets
 
@@ -20,7 +22,7 @@ def oauth_authorization_server(request):
         "service_documentation": None,
         "authorization_endpoint": oauth_url,
         "token_endpoint": urljoin(base_url, '/oauth/token/'),  # Allauth token endpoint
-        "app_registration_endpoint": urljoin(base_url, 'api/v1/apps'),
+        "app_registration_endpoint": urljoin(base_url, '/api/v1/apps'),
         "revocation_endpoint": urljoin(base_url, '/oauth/revoke_token/'),  # Optional
         "introspection_endpoint": urljoin(base_url, '/oauth/introspect/'),  # Optional
         "scopes_supported": [
@@ -83,6 +85,9 @@ def register_oauth_client(request):
         if not client_name or not redirect_uris:
             return JsonResponse({'error': 'client_name and redirect_uris are required'}, status=400)
 
+        if type(redirect_uris) is list:
+            redirect_uris = " ".join(redirect_uris)  # Convert list to space-separated string
+
         # Generate client_id and client_secret
         client_id = secrets.token_urlsafe(32)
         client_secret = secrets.token_urlsafe(48)
@@ -111,3 +116,10 @@ def register_oauth_client(request):
 
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=400)
+    
+
+class CustomAuthorizationView(AuthorizationView):
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_anonymous:
+            request.user = AnonymousUser()  # Allow anonymous users to authorize
+        return super().dispatch(request, *args, **kwargs)

@@ -1,5 +1,5 @@
 from django.urls import path
-from django_activitypub.views import webfinger, profile, followers, inbox, outbox, hostmeta, nodeinfo, nodeinfo_links, notes, followings, remote_redirect
+from django_activitypub.views import webfinger, profile, followers, inbox, outbox, hostmeta, nodeinfo, nodeinfo_links, notes, followings, remote_redirect, CustomAuthorizationView
 from django_activitypub.oauth import oauth_authorization_server, register_oauth_client
 
 urlpatterns = [
@@ -28,4 +28,5 @@ urlpatterns = [
     path('pub/<slug:username>/outbox', outbox, name='activitypub-outbox'),
     path('.well-known/oauth-authorization-server', oauth_authorization_server, name='oauth_authorization_server'),
     path('api/v1/apps', register_oauth_client, name="oauth_register"),
+    path('oauth/authorize/', CustomAuthorizationView.as_view(), name="authorize"),
 ]
