@@ -100,20 +100,4 @@ class CustomAuthorizationView(AuthorizationView):
             client_id = request.GET.get("client_id")
             app = Application.objects.get(client_id=client_id)
 
-            # Generate an access token
-            token = AccessToken.objects.create(
-                user=None,  # No user required
-                application=app,
-                token=secrets.token_urlsafe(32),
-                expires=timezone.now() + timezone.timedelta(days=1),
-                scope="read write follow profile",
-            )
-
-            return JsonResponse({
-                "access_token": token.token,
-                "token_type": "Bearer",
-                "expires_in": 86400,
-                "scope": token.scope,
-            })
-
         return super().dispatch(request, *args, **kwargs)
