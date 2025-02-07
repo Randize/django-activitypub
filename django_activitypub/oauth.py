@@ -96,8 +96,5 @@ def register_oauth_client(request):
 class CustomAuthorizationView(AuthorizationView):
     def dispatch(self, request, *args, **kwargs):
         if request.user.is_anonymous:
-            # Find the application by client_id
-            client_id = request.GET.get("client_id")
-            app = Application.objects.get(client_id=client_id)
-
+            request.user = AnonymousUser()
         return super().dispatch(request, *args, **kwargs)
