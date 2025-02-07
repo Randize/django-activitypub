@@ -28,5 +28,5 @@ urlpatterns = [
     path('pub/<slug:username>/outbox', outbox, name='activitypub-outbox'),
     path('.well-known/oauth-authorization-server', oauth_authorization_server, name='oauth_authorization_server'),
     path('api/v1/apps', register_oauth_client, name="oauth_register"),
-    # path('oauth/authorize/', CustomAuthorizationView.as_view(), name="authorize"),
+    path('oauth/authorize/', CustomAuthorizationView.as_view(), name="authorize"),
 ]

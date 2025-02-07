@@ -68,11 +68,14 @@ def register_oauth_client(request):
 
         # Create the application in Django OAuth Toolkit
         application = Application.objects.create(
-            name=client_name,
-            redirect_uris=" ".join(redirect_uris),
-            client_type=Application.CLIENT_CONFIDENTIAL,
-            authorization_grant_type=Application.GRANT_AUTHORIZATION_CODE,
-            user=None  # Optional: Assign a user if required
+            name = client_name,
+            client_id = client_id,
+            client_secret = client_secret,
+            redirect_uris = " ".join(redirect_uris),
+            client_type = Application.CLIENT_CONFIDENTIAL,
+            authorization_grant_type = Application.GRANT_AUTHORIZATION_CODE,
+            skip_authorization = True,
+            user = None  # Optional: Assign a user if required
         )
 
         response = {
