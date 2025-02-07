@@ -100,4 +100,4 @@ class CustomAuthorizationView(AuthorizationView):
         return super().dispatch(request, *args, **kwargs)
 
     def handle_no_permission(self):
-        return super().dispatch(self.request) 
+        return super().get(self.request) 
