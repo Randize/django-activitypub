@@ -99,5 +99,5 @@ class CustomAuthorizationView(AuthorizationView):
             request.user = AnonymousUser()
         return super().dispatch(request, *args, **kwargs)
 
-    def handle_no_permission(self):
-        return super().get(self.request) 
+    # def handle_no_permission(self):
+    #     return super().get(self.request) 
