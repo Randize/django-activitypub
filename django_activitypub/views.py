@@ -268,7 +268,8 @@ def remote_redirect(request, username, domain):
         subscribe_url = subscribe_template.replace('{uri}', uri)
 
         return JsonResponse({'url': subscribe_url})
-
+    except Http404:
+        return JsonResponse({'error': 'Invalid server domain'}, status=404)
     except requests.RequestException as e:
         return JsonResponse({'error': str(e)}, status=500)
     
