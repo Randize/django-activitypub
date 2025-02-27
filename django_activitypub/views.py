@@ -250,6 +250,7 @@ def remote_redirect(request, username, domain):
     params = {'resource': resource}
 
     try:
+        RemoteActor.objects.get_or_create_with_username_domain(username, domain)
         uri = request.GET.get('uri', handle)
         # Request WebFinger data
         response = requests.get(webfinger_url, params=params, timeout=5)
