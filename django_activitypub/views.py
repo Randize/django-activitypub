@@ -249,8 +249,8 @@ def remote_redirect(request, username, domain):
     handle = f"@{username}@{domain}"
     params = {'resource': resource}
 
-    uri = quote(request.GET.get('uri'), handle)
     try:
+        uri = quote(request.GET.get('uri', ''), handle)
         # Request WebFinger data
         response = requests.get(webfinger_url, params=params, timeout=5)
         response.raise_for_status()  # Raise error for non-200 responses
