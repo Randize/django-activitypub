@@ -336,6 +336,7 @@ class Note(TreeNode):
     sensitive = models.BooleanField(default=False)
     tombstone = models.BooleanField(default=False)
     federate = models.BooleanField(default=False)
+    update = models.BooleanField(default=False)
     attachments = models.ManyToManyField('ImageAttachment', blank=True, related_name='attachments')
 
     objects = NoteManager.as_manager()
@@ -741,9 +742,14 @@ def get_with_url(url):
 
 @receiver(post_save, sender=Note)
 def note_dispatch(sender, instance, created, **kwargs):
-    if not instance.tombstone and instance.federate and instance.local_actor:
+    if not instance.tombstone and instance.local_actor and instance.federate or instance.update:
         def process_note():
-            send_create_note_to_followers(instance)
+            if instance.update:
+                send_update_note_to_followers(instance.local_actor)
+            else:
+                send_create_note_to_followers(instance)
+            instance.update = False
+            instance.save(update_fields=["update"])
             instance.federate = False
             instance.save(update_fields=["federate"])
         transaction.on_commit(process_note)
